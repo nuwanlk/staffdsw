@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Staff - Staff Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b88;
+            --text: #eee;
+            --text-dim: #a0a0a0;
+            --bg: #0f0f1e;
+            --card-bg: #1a1a2e;
+            --border: #2a2a3e;
+            --success: #4ecca3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.05) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .nav-btn {
+            font-family: 'Space Mono', monospace;
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .nav-btn:hover::before {
+            left: 0;
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .search-container {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            color: var(--text-dim);
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            font-family: 'Crimson Pro', serif;
+            padding: 0.8rem;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .search-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-btn,
+        .clear-btn,
+        .export-btn {
+            font-family: 'Space Mono', monospace;
+            padding: 1rem 2rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border);
+        }
+
+        .search-btn {
+            background: var(--accent);
+            color: var(--text);
+            border-color: var(--accent);
+            flex: 1;
+        }
+
+        .search-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+        }
+
+        .clear-btn {
+            background: transparent;
+            color: var(--text-dim);
+        }
+
+        .clear-btn:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .export-btn {
+            background: transparent;
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .export-btn:hover {
+            background: var(--success);
+            color: var(--bg);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-count {
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            color: var(--text-dim);
+        }
+
+        .results-count strong {
+            color: var(--accent);
+        }
+
+        .results-container {
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .staff-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .staff-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .staff-card:hover {
+            border-color: var(--accent);
+        }
+
+        .staff-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .staff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .staff-name {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+
+        .staff-designation {
+            color: var(--accent-light);
+            font-size: 1rem;
+        }
+
+        .staff-id {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-align: right;
+        }
+
+        .staff-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .detail-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+        }
+
+        .detail-value {
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .expand-btn {
+            margin-top: 1rem;
+            font-family: 'Space Mono', monospace;
+            padding: 0.7rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .expand-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .expanded-details {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .expanded-details.show {
+            display: block;
+        }
+
+        .section-subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .section-subtitle:first-child {
+            margin-top: 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .children-list {
+            margin-top: 0.5rem;
+        }
+
+        .child-item {
+            background: var(--bg);
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-left: 2px solid var(--accent);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SEARCH STAFF</h1>
+            <p class="subtitle">Advanced search & filtering</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-btn">Dashboard</a>
+            <a href="insert.html" class="nav-btn">Add Staff</a>
+            <a href="search.html" class="nav-btn active">Search</a>
+        </nav>
+
+        <div class="search-container">
+            <div class="search-grid">
+                <div class="search-group">
+                    <label for="search-name">Name</label>
+                    <input type="text" id="search-name" placeholder="Search by name...">
+                </div>
+                <div class="search-group">
+                    <label for="search-designation">Designation</label>
+                    <input type="text" id="search-designation" placeholder="Search by designation...">
+                </div>
+                <div class="search-group">
+                    <label for="search-grade">Grade</label>
+                    <input type="text" id="search-grade" placeholder="Search by grade...">
+                </div>
+                <div class="search-group">
+                    <label for="search-gender">Gender</label>
+                    <select id="search-gender">
+                        <option value="">All</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label for="search-nic">NIC Number</label>
+                    <input type="text" id="search-nic" placeholder="Search by NIC...">
+                </div>
+                <div class="search-group">
+                    <label for="search-marital">Marital Status</label>
+                    <select id="search-marital">
+                        <option value="">All</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-buttons">
+                <button class="search-btn" onclick="searchStaff()">Search</button>
+                <button class="clear-btn" onclick="clearSearch()">Clear</button>
+                <button class="export-btn" onclick="exportResults()">Export CSV</button>
+            </div>
+        </div>
+
+        <div class="results-container">
+            <div class="results-header">
+                <div class="results-count" id="results-count">
+                    <strong>0</strong> results found
+                </div>
+            </div>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentResults = [];
+
+        async function searchStaff() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div><br>Searching...</div>';
+
+            try {
+                let query = supabase.from('staff_members').select('*');
+
+                // Apply filters
+                const name = document.getElementById('search-name').value.trim();
+                const designation = document.getElementById('search-designation').value.trim();
+                const grade = document.getElementById('search-grade').value.trim();
+                const gender = document.getElementById('search-gender').value;
+                const nic = document.getElementById('search-nic').value.trim();
+                const marital = document.getElementById('search-marital').value;
+
+                if (name) {
+                    query = query.or(`name_with_initials.ilike.%${name}%,name_full_english.ilike.%${name}%,name_full_sinhala.ilike.%${name}%`);
+                }
+                if (designation) {
+                    query = query.ilike('designation', `%${designation}%`);
+                }
+                if (grade) {
+                    query = query.ilike('grade', `%${grade}%`);
+                }
+                if (gender) {
+                    query = query.eq('gender', gender);
+                }
+                if (nic) {
+                    query = query.ilike('nic_number', `%${nic}%`);
+                }
+                if (marital) {
+                    query = query.eq('marital_status', marital);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                currentResults = data;
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsDiv.innerHTML = `<div class="no-results">Error: ${error.message}</div>`;
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const countDiv = document.getElementById('results-count');
+
+            countDiv.innerHTML = `<strong>${data.length}</strong> result${data.length !== 1 ? 's' : ''} found`;
+
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">No staff members found matching your criteria</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = data.map((staff, index) => `
+                <div class="staff-card">
+                    <div class="staff-header">
+                        <div>
+                            <div class="staff-name">${staff.name_with_initials || 'N/A'}</div>
+                            <div class="staff-designation">${staff.designation || 'No designation'}</div>
+                        </div>
+                        <div class="staff-id">ID: ${staff.id.substring(0, 8)}</div>
+                    </div>
+                    
+                    <div class="staff-details">
+                        ${staff.name_full_english ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Full Name (English)</div>
+                            <div class="detail-value">${staff.name_full_english}</div>
+                        </div>
+                        ` : ''}
+                        ${staff.grade ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Grade</div>
+                            <div class="detail-value">${staff.grade}</div>
+                        </div>
+                        ` : ''}
+                        ${staff.gender ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Gender</div>
+                            <div class="detail-value">${staff.gender}</div>
+                        </div>
+                        ` : ''}
+                        ${staff.nic_number ? `
+                        <div class="detail-group">
+                            <div class="detail-label">NIC Number</div>
+                            <div class="detail-value">${staff.nic_number}</div>
+                        </div>
+                        ` : ''}
+                        ${staff.phone_no ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">${staff.phone_no}</div>
+                        </div>
+                        ` : ''}
+                        ${staff.email_address ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">${staff.email_address}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <button class="expand-btn" onclick="toggleExpand(${index})">Show More Details</button>
+                    
+                    <div class="expanded-details" id="expanded-${index}">
+                        ${staff.permanent_address ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Permanent Address</div>
+                            <div class="detail-value">${staff.permanent_address}</div>
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.marital_status || staff.spouse_name ? `
+                        <div class="section-subtitle">Family Information</div>
+                        <div class="staff-details">
+                            ${staff.marital_status ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Marital Status</div>
+                                <div class="detail-value">${staff.marital_status}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.spouse_name ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Spouse Name</div>
+                                <div class="detail-value">${staff.spouse_name}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.spouse_designation ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Spouse Designation</div>
+                                <div class="detail-value">${staff.spouse_designation}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.spouse_workplace ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Spouse Workplace</div>
+                                <div class="detail-value">${staff.spouse_workplace}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.children && staff.children.length > 0 ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Children</div>
+                            <div class="children-list">
+                                ${staff.children.map(child => `
+                                    <div class="child-item">
+                                        <strong>${child.name || 'N/A'}</strong> - 
+                                        ${child.gender || 'N/A'} - 
+                                        DOB: ${child.date_of_birth || 'N/A'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.first_appointment_date || staff.previous_appointment_designation ? `
+                        <div class="section-subtitle">Employment History</div>
+                        <div class="staff-details">
+                            ${staff.first_appointment_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">First Appointment</div>
+                                <div class="detail-value">${new Date(staff.first_appointment_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.previous_appointment_designation ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Previous Designation</div>
+                                <div class="detail-value">${staff.previous_appointment_designation}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.previous_appointment_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Previous Appointment Date</div>
+                                <div class="detail-value">${new Date(staff.previous_appointment_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.transferred_to_current_institute_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Transfer Date</div>
+                                <div class="detail-value">${new Date(staff.transferred_to_current_institute_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            <div class="detail-group">
+                                <div class="detail-label">Permanent Appointment</div>
+                                <div class="detail-value">${staff.is_appointment_permanent ? 'Yes' : 'No'}</div>
+                            </div>
+                            ${staff.permanent_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Permanent Date</div>
+                                <div class="detail-value">${new Date(staff.permanent_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.education_qualifications ? `
+                        <div class="section-subtitle">Education</div>
+                        <div class="detail-group">
+                            <div class="detail-label">Qualifications</div>
+                            <div class="detail-value">${staff.education_qualifications}</div>
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.efficiency_bar_exam_grade3_date || staff.efficiency_bar_exam_grade2_date || staff.efficiency_bar_exam_grade1_date ? `
+                        <div class="section-subtitle">Efficiency Bar Exams</div>
+                        <div class="staff-details">
+                            ${staff.efficiency_bar_exam_grade3_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Grade 3 Exam</div>
+                                <div class="detail-value">${new Date(staff.efficiency_bar_exam_grade3_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.efficiency_bar_exam_grade2_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Grade 2 Exam</div>
+                                <div class="detail-value">${new Date(staff.efficiency_bar_exam_grade2_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.efficiency_bar_exam_grade1_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Grade 1 Exam</div>
+                                <div class="detail-value">${new Date(staff.efficiency_bar_exam_grade1_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.promoted_to_grade2_date || staff.promoted_to_grade1_date || staff.promoted_to_special_grade_date || staff.promoted_to_supra_date ? `
+                        <div class="section-subtitle">Promotions</div>
+                        <div class="staff-details">
+                            ${staff.promoted_to_grade2_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Grade 2</div>
+                                <div class="detail-value">${new Date(staff.promoted_to_grade2_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.promoted_to_grade1_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Grade 1</div>
+                                <div class="detail-value">${new Date(staff.promoted_to_grade1_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.promoted_to_special_grade_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Special Grade</div>
+                                <div class="detail-value">${new Date(staff.promoted_to_special_grade_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.promoted_to_supra_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Supra</div>
+                                <div class="detail-value">${new Date(staff.promoted_to_supra_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        ${staff.has_disability || staff.pension_date || staff.resignation_date ? `
+                        <div class="section-subtitle">Additional Information</div>
+                        <div class="staff-details">
+                            ${staff.has_disability ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Has Disability</div>
+                                <div class="detail-value">${staff.has_disability}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.pension_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Pension Date</div>
+                                <div class="detail-value">${new Date(staff.pension_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                            ${staff.resignation_date ? `
+                            <div class="detail-group">
+                                <div class="detail-label">Resignation Date</div>
+                                <div class="detail-value">${new Date(staff.resignation_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleExpand(index) {
+            const expandedDiv = document.getElementById(`expanded-${index}`);
+            const btn = event.target;
+            
+            if (expandedDiv.classList.contains('show')) {
+                expandedDiv.classList.remove('show');
+                btn.textContent = 'Show More Details';
+            } else {
+                expandedDiv.classList.add('show');
+                btn.textContent = 'Show Less Details';
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('search-name').value = '';
+            document.getElementById('search-designation').value = '';
+            document.getElementById('search-grade').value = '';
+            document.getElementById('search-gender').value = '';
+            document.getElementById('search-nic').value = '';
+            document.getElementById('search-marital').value = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('results-count').innerHTML = '<strong>0</strong> results found';
+            currentResults = [];
+        }
+
+        function exportResults() {
+            if (currentResults.length === 0) {
+                alert('No results to export');
+                return;
+            }
+
+            const headers = [
+                'Name with Initials', 'Full Name (English)', 'Full Name (Sinhala)',
+                'Designation', 'Grade', 'Gender', 'NIC Number', 'Phone', 'Email',
+                'Marital Status', 'First Appointment Date', 'Is Permanent'
+            ];
+
+            const csvContent = [
+                headers.join(','),
+                ...currentResults.map(staff => [
+                    `"${staff.name_with_initials || ''}"`,
+                    `"${staff.name_full_english || ''}"`,
+                    `"${staff.name_full_sinhala || ''}"`,
+                    `"${staff.designation || ''}"`,
+                    `"${staff.grade || ''}"`,
+                    `"${staff.gender || ''}"`,
+                    `"${staff.nic_number || ''}"`,
+                    `"${staff.phone_no || ''}"`,
+                    `"${staff.email_address || ''}"`,
+                    `"${staff.marital_status || ''}"`,
+                    `"${staff.first_appointment_date || ''}"`,
+                    `"${staff.is_appointment_permanent ? 'Yes' : 'No'}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `staff_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Load all staff on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            searchStaff();
+        });
+    </script>
+</body>
+</html>

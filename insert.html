@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Staff Member - Staff Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b88;
+            --text: #eee;
+            --text-dim: #a0a0a0;
+            --bg: #0f0f1e;
+            --card-bg: #1a1a2e;
+            --border: #2a2a3e;
+            --success: #4ecca3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.05) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .nav-btn {
+            font-family: 'Space Mono', monospace;
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .nav-btn:hover::before {
+            left: 0;
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 3rem;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            margin-top: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            color: var(--accent-light);
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            color: var(--text-dim);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        select,
+        textarea {
+            font-family: 'Crimson Pro', serif;
+            padding: 1rem;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .children-container {
+            grid-column: 1 / -1;
+        }
+
+        .child-entry {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .child-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .remove-child-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-child-btn:hover {
+            background: var(--accent);
+            color: var(--text);
+        }
+
+        .add-child-btn {
+            background: transparent;
+            border: 2px dashed var(--border);
+            color: var(--text-dim);
+            padding: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .add-child-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        .submit-btn,
+        .reset-btn {
+            font-family: 'Space Mono', monospace;
+            padding: 1.2rem 3rem;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn {
+            background: var(--accent);
+            color: var(--text);
+            border-color: var(--accent);
+            flex: 1;
+        }
+
+        .submit-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: transparent;
+            color: var(--text-dim);
+        }
+
+        .reset-btn:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .message {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            font-family: 'Space Mono', monospace;
+            border: 2px solid;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .message.success {
+            background: rgba(78, 204, 163, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .message.error {
+            background: rgba(233, 69, 96, 0.1);
+            border-color: var(--accent);
+            color: var(--accent-light);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--text);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ADD STAFF MEMBER</h1>
+            <p class="subtitle">Complete staff registration form</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-btn">Dashboard</a>
+            <a href="insert.html" class="nav-btn active">Add Staff</a>
+            <a href="search.html" class="nav-btn">Search</a>
+        </nav>
+
+        <div id="message-container"></div>
+
+        <div class="form-container">
+            <form id="staff-form">
+                <!-- Personal Information -->
+                <div class="section-title">Personal Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name_with_initials">Name with Initials *</label>
+                        <input type="text" id="name_with_initials" name="name_with_initials" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name_full_sinhala">Full Name (Sinhala)</label>
+                        <input type="text" id="name_full_sinhala" name="name_full_sinhala">
+                    </div>
+                    <div class="form-group">
+                        <label for="name_full_english">Full Name (English)</label>
+                        <input type="text" id="name_full_english" name="name_full_english">
+                    </div>
+                    <div class="form-group">
+                        <label for="nic_number">NIC Number</label>
+                        <input type="text" id="nic_number" name="nic_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="marital_status">Marital Status</label>
+                        <select id="marital_status" name="marital_status">
+                            <option value="">Select Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="permanent_address">Permanent Address</label>
+                        <textarea id="permanent_address" name="permanent_address"></textarea>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="section-title">Contact Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="phone_no">Phone Number</label>
+                        <input type="tel" id="phone_no" name="phone_no">
+                    </div>
+                    <div class="form-group">
+                        <label for="whatsapp_no">WhatsApp Number</label>
+                        <input type="tel" id="whatsapp_no" name="whatsapp_no">
+                    </div>
+                    <div class="form-group">
+                        <label for="email_address">Email Address</label>
+                        <input type="email" id="email_address" name="email_address">
+                    </div>
+                </div>
+
+                <!-- Employment Information -->
+                <div class="section-title">Employment Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="designation">Designation</label>
+                        <input type="text" id="designation" name="designation">
+                    </div>
+                    <div class="form-group">
+                        <label for="grade">Grade</label>
+                        <input type="text" id="grade" name="grade">
+                    </div>
+                    <div class="form-group">
+                        <label for="first_appointment_date">First Appointment Date</label>
+                        <input type="date" id="first_appointment_date" name="first_appointment_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="previous_appointment_designation">Previous Designation</label>
+                        <input type="text" id="previous_appointment_designation" name="previous_appointment_designation">
+                    </div>
+                    <div class="form-group">
+                        <label for="previous_appointment_date">Previous Appointment Date</label>
+                        <input type="date" id="previous_appointment_date" name="previous_appointment_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferred_to_current_institute_date">Transfer Date to Current Institute</label>
+                        <input type="date" id="transferred_to_current_institute_date" name="transferred_to_current_institute_date">
+                    </div>
+                    <div class="form-group">
+                        <label>Is Appointment Permanent?</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="is_appointment_permanent" name="is_appointment_permanent">
+                            <label for="is_appointment_permanent" style="margin-bottom: 0; text-transform: none;">Yes</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="permanent_date">Permanent Date</label>
+                        <input type="date" id="permanent_date" name="permanent_date">
+                    </div>
+                </div>
+
+                <!-- Education & Qualifications -->
+                <div class="section-title">Education & Qualifications</div>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="education_qualifications">Education Qualifications</label>
+                        <textarea id="education_qualifications" name="education_qualifications"></textarea>
+                    </div>
+                </div>
+
+                <!-- Efficiency Bar Exams -->
+                <div class="section-title">Efficiency Bar Exams</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="efficiency_bar_exam_grade3_date">Grade 3 Exam Date</label>
+                        <input type="date" id="efficiency_bar_exam_grade3_date" name="efficiency_bar_exam_grade3_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="efficiency_bar_exam_grade2_date">Grade 2 Exam Date</label>
+                        <input type="date" id="efficiency_bar_exam_grade2_date" name="efficiency_bar_exam_grade2_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="efficiency_bar_exam_grade1_date">Grade 1 Exam Date</label>
+                        <input type="date" id="efficiency_bar_exam_grade1_date" name="efficiency_bar_exam_grade1_date">
+                    </div>
+                </div>
+
+                <!-- Promotions -->
+                <div class="section-title">Promotions</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="promoted_to_grade2_date">Promoted to Grade 2</label>
+                        <input type="date" id="promoted_to_grade2_date" name="promoted_to_grade2_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="promoted_to_grade1_date">Promoted to Grade 1</label>
+                        <input type="date" id="promoted_to_grade1_date" name="promoted_to_grade1_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="promoted_to_special_grade_date">Promoted to Special Grade</label>
+                        <input type="date" id="promoted_to_special_grade_date" name="promoted_to_special_grade_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="promoted_to_supra_date">Promoted to Supra</label>
+                        <input type="date" id="promoted_to_supra_date" name="promoted_to_supra_date">
+                    </div>
+                </div>
+
+                <!-- Leave Information -->
+                <div class="section-title">Leave Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="leave_from_date">Leave From Date</label>
+                        <input type="date" id="leave_from_date" name="leave_from_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="leave_to_date">Leave To Date</label>
+                        <input type="date" id="leave_to_date" name="leave_to_date">
+                    </div>
+                </div>
+
+                <!-- Spouse Information -->
+                <div class="section-title">Spouse Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="spouse_name">Spouse Name</label>
+                        <input type="text" id="spouse_name" name="spouse_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="spouse_designation">Spouse Designation</label>
+                        <input type="text" id="spouse_designation" name="spouse_designation">
+                    </div>
+                    <div class="form-group">
+                        <label for="spouse_workplace">Spouse Workplace</label>
+                        <input type="text" id="spouse_workplace" name="spouse_workplace">
+                    </div>
+                </div>
+
+                <!-- Children Information -->
+                <div class="section-title">Children Information</div>
+                <div class="children-container">
+                    <div id="children-list"></div>
+                    <button type="button" class="add-child-btn" onclick="addChild()">+ Add Child</button>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="section-title">Additional Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="has_disability">Has Disability?</label>
+                        <select id="has_disability" name="has_disability">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pension_date">Pension Date</label>
+                        <input type="date" id="pension_date" name="pension_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="resignation_date">Resignation Date</label>
+                        <input type="date" id="resignation_date" name="resignation_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="moved_to_another_service_date">Moved to Another Service</label>
+                        <input type="date" id="moved_to_another_service_date" name="moved_to_another_service_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="dismissal_date">Dismissal Date</label>
+                        <input type="date" id="dismissal_date" name="dismissal_date">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+                    <button type="reset" class="reset-btn">Reset Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let childCount = 0;
+
+        function addChild() {
+            childCount++;
+            const childrenList = document.getElementById('children-list');
+            const childEntry = document.createElement('div');
+            childEntry.className = 'child-entry';
+            childEntry.id = `child-${childCount}`;
+            childEntry.innerHTML = `
+                <button type="button" class="remove-child-btn" onclick="removeChild(${childCount})">Remove</button>
+                <div class="child-grid">
+                    <div class="form-group">
+                        <label>Child Name</label>
+                        <input type="text" name="child_name_${childCount}" class="child-name">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" name="child_dob_${childCount}" class="child-dob">
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select name="child_gender_${childCount}" class="child-gender">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            childrenList.appendChild(childEntry);
+        }
+
+        function removeChild(id) {
+            const childEntry = document.getElementById(`child-${id}`);
+            if (childEntry) {
+                childEntry.remove();
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function getChildren() {
+            const children = [];
+            const childEntries = document.querySelectorAll('.child-entry');
+            
+            childEntries.forEach(entry => {
+                const name = entry.querySelector('.child-name').value;
+                const dob = entry.querySelector('.child-dob').value;
+                const gender = entry.querySelector('.child-gender').value;
+                
+                if (name || dob || gender) {
+                    children.push({
+                        name: name,
+                        date_of_birth: dob,
+                        gender: gender
+                    });
+                }
+            });
+            
+            return children.length > 0 ? children : null;
+        }
+
+        document.getElementById('staff-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
+
+            try {
+                const formData = new FormData(e.target);
+                const data = {};
+
+                // Process all form fields
+                for (let [key, value] of formData.entries()) {
+                    if (key.startsWith('child_')) continue; // Skip child fields
+                    
+                    if (value === '') {
+                        data[key] = null;
+                    } else if (key === 'is_appointment_permanent') {
+                        data[key] = true;
+                    } else {
+                        data[key] = value;
+                    }
+                }
+
+                // Handle checkbox if not checked
+                if (!formData.has('is_appointment_permanent')) {
+                    data.is_appointment_permanent = false;
+                }
+
+                // Add children data
+                data.children = getChildren();
+
+                // Insert into Supabase
+                const { error } = await supabase
+                    .from('staff_members')
+                    .insert([data]);
+
+                if (error) throw error;
+
+                showMessage('✓ Staff member added successfully!', 'success');
+                document.getElementById('staff-form').reset();
+                document.getElementById('children-list').innerHTML = '';
+                childCount = 0;
+
+            } catch (error) {
+                console.error('Error adding staff:', error);
+                showMessage(`✗ Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit';
+            }
+        });
+
+        // Reset form handler
+        document.querySelector('.reset-btn').addEventListener('click', () => {
+            document.getElementById('children-list').innerHTML = '';
+            childCount = 0;
+        });
+    </script>
+</body>
+</html>

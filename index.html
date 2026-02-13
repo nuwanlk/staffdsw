@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management System - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b88;
+            --text: #eee;
+            --text-dim: #a0a0a0;
+            --bg: #0f0f1e;
+            --card-bg: #1a1a2e;
+            --border: #2a2a3e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.05) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .nav-btn {
+            font-family: 'Space Mono', monospace;
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .nav-btn:hover::before {
+            left: 0;
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out both;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.3s; }
+        .stat-card:nth-child(2) { animation-delay: 0.4s; }
+        .stat-card:nth-child(3) { animation-delay: 0.5s; }
+        .stat-card:nth-child(4) { animation-delay: 0.6s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .stat-description {
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+        }
+
+        .chart-section {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease-out 0.7s both;
+        }
+
+        .chart-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-bar {
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .chart-label span:first-child {
+            color: var(--text);
+        }
+
+        .chart-label span:last-child {
+            color: var(--accent);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .chart-bar-bg {
+            height: 8px;
+            background: var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+            transition: width 1s ease-out;
+            width: 0;
+        }
+
+        .recent-activity {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out 0.8s both;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-left: 2px solid var(--border);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .activity-item:hover {
+            border-left-color: var(--accent);
+            padding-left: 2rem;
+        }
+
+        .activity-time {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 0.3rem;
+        }
+
+        .activity-text {
+            color: var(--text);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .error {
+            background: rgba(233, 69, 96, 0.1);
+            border: 2px solid var(--accent);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-light);
+            font-family: 'Space Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>STAFF MANAGEMENT</h1>
+            <p class="subtitle">Real-time dashboard & analytics</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-btn active">Dashboard</a>
+            <a href="insert.html" class="nav-btn">Add Staff</a>
+            <a href="search.html" class="nav-btn">Search</a>
+        </nav>
+
+        <div id="error-container"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Staff</div>
+                <div class="stat-value" id="total-staff">---</div>
+                <div class="stat-description">Active employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Male</div>
+                <div class="stat-value" id="male-count">---</div>
+                <div class="stat-description">Male employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Female</div>
+                <div class="stat-value" id="female-count">---</div>
+                <div class="stat-description">Female employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">This Month</div>
+                <div class="stat-value" id="month-count">---</div>
+                <div class="stat-description">New appointments</div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-title">Staff by Designation</div>
+            <div id="designation-chart"></div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-title">Staff by Grade</div>
+            <div id="grade-chart"></div>
+        </div>
+
+        <div class="recent-activity">
+            <div class="chart-title">Recent Additions</div>
+            <div id="recent-activity"></div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        async function loadDashboard() {
+            try {
+                // Fetch all staff data
+                const { data: staff, error } = await supabase
+                    .from('staff_members')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Calculate statistics
+                const totalStaff = staff.length;
+                const maleCount = staff.filter(s => s.gender?.toLowerCase() === 'male').length;
+                const femaleCount = staff.filter(s => s.gender?.toLowerCase() === 'female').length;
+                
+                // Count staff added this month
+                const now = new Date();
+                const thisMonth = staff.filter(s => {
+                    if (!s.created_at) return false;
+                    const created = new Date(s.created_at);
+                    return created.getMonth() === now.getMonth() && 
+                           created.getFullYear() === now.getFullYear();
+                }).length;
+
+                // Update stats
+                animateValue('total-staff', 0, totalStaff, 1000);
+                animateValue('male-count', 0, maleCount, 1000);
+                animateValue('female-count', 0, femaleCount, 1000);
+                animateValue('month-count', 0, thisMonth, 1000);
+
+                // Group by designation
+                const designationCounts = {};
+                staff.forEach(s => {
+                    const designation = s.designation || 'Not Specified';
+                    designationCounts[designation] = (designationCounts[designation] || 0) + 1;
+                });
+
+                // Group by grade
+                const gradeCounts = {};
+                staff.forEach(s => {
+                    const grade = s.grade || 'Not Specified';
+                    gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
+                });
+
+                // Render charts
+                renderChart('designation-chart', designationCounts, totalStaff);
+                renderChart('grade-chart', gradeCounts, totalStaff);
+
+                // Render recent activity
+                renderRecentActivity(staff.slice(0, 5));
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError('Failed to load dashboard data. Please check your Supabase configuration.');
+            }
+        }
+
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+
+        function renderChart(containerId, data, total) {
+            const container = document.getElementById(containerId);
+            const sortedData = Object.entries(data)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+
+            container.innerHTML = sortedData.map(([label, count]) => {
+                const percentage = (count / total * 100).toFixed(1);
+                return `
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>${label}</span>
+                            <span>${count} (${percentage}%)</span>
+                        </div>
+                        <div class="chart-bar-bg">
+                            <div class="chart-bar-fill" data-width="${percentage}"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Animate bars
+            setTimeout(() => {
+                container.querySelectorAll('.chart-bar-fill').forEach(bar => {
+                    bar.style.width = bar.dataset.width + '%';
+                });
+            }, 100);
+        }
+
+        function renderRecentActivity(staff) {
+            const container = document.getElementById('recent-activity');
+            
+            if (staff.length === 0) {
+                container.innerHTML = '<div class="activity-item"><div class="activity-text">No recent additions</div></div>';
+                return;
+            }
+
+            container.innerHTML = staff.map(s => {
+                const date = s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                }) : 'Unknown date';
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-time">${date}</div>
+                        <div class="activity-text">
+                            <strong>${s.name_with_initials || 'Unknown'}</strong> added as 
+                            ${s.designation || 'Staff Member'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load dashboard on page load
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>
