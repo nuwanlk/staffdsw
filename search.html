@@ -878,6 +878,12 @@
             window.URL.revokeObjectURL(url);
         }
 
+        // Expose functions to global scope for inline onclick handlers
+        window.searchStaff = searchStaff;
+        window.clearSearch = clearSearch;
+        window.exportResults = exportResults;
+        window.toggleExpand = toggleExpand;
+
         // Load all staff on page load
         document.addEventListener('DOMContentLoaded', () => {
             searchStaff();
