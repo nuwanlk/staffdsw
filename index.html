@@ -398,16 +398,25 @@
         }
 
         async function checkSupabaseConnection() {
+            const statusContainer = document.getElementById('status-container');
             try {
-                const { data, error } = await supabase.auth.getSession();
-                if (error && error.message !== 'Auth session missing') {
-                    throw error;
+                // Simple test: try to fetch a single row to verify connection
+                const { data, error } = await supabase
+                    .from('staff_members')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    statusContainer.innerHTML = '<div class="error">⚠ Supabase connection failed: ' + error.message + '</div>';
+                    console.error('Supabase connection error:', error);
+                    return false;
                 }
-                const statusContainer = document.getElementById('status-container');
+                
                 statusContainer.innerHTML = '<div class="success">Supabase connection active</div>';
                 return true;
             } catch (error) {
-                console.warn('Supabase connection check:', error);
+                statusContainer.innerHTML = '<div class="error">⚠ Error connecting to Supabase: ' + error.message + '</div>';
+                console.error('Supabase connection exception:', error);
                 return false;
             }
         }
