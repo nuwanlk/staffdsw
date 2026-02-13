@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Staff Member - Staff Management System</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase will be imported as an ES module in the page script -->
     <style>
         :root {
             --primary: #1a1a2e;
@@ -385,6 +385,13 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .field-error {
+            color: var(--accent-light);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            margin-top: 0.35rem;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -420,8 +427,8 @@
                         <input type="text" id="name_full_english" name="name_full_english">
                     </div>
                     <div class="form-group">
-                        <label for="nic_number">NIC Number</label>
-                        <input type="text" id="nic_number" name="nic_number">
+                        <label for="nic_number">NIC Number *</label>
+                        <input type="text" id="nic_number" name="nic_number" required>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -626,12 +633,29 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
         // Supabase Configuration
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function checkSupabaseConnection() {
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                if (error && error.message !== 'Auth session missing') throw error;
+                const messageContainer = document.getElementById('message-container');
+                messageContainer.innerHTML = '<div class="message success">Supabase connection active</div>';
+                setTimeout(() => { messageContainer.innerHTML = ''; }, 3000);
+                return true;
+            } catch (err) {
+                console.warn('Supabase connection check failed', err);
+                showMessage('✗ Cannot reach Supabase. Check network or credentials.', 'error');
+                return false;
+            }
+        }
 
         let childCount = 0;
 
@@ -701,22 +725,102 @@
             
             return children.length > 0 ? children : null;
         }
+        // --- Form validation helpers ---
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error').forEach(el => el.remove());
+        }
+
+        function setFieldError(inputEl, message) {
+            // remove existing
+            const next = inputEl.nextElementSibling;
+            if (next && next.classList && next.classList.contains('field-error')) next.remove();
+            const span = document.createElement('span');
+            span.className = 'field-error';
+            span.textContent = message;
+            inputEl.insertAdjacentElement('afterend', span);
+        }
+
+        function validateForm(form) {
+            clearFieldErrors();
+            const errors = [];
+
+            const name = form.querySelector('#name_with_initials');
+            if (!name || !name.value.trim()) {
+                setFieldError(name, 'Name with initials is required');
+                errors.push(name);
+            }
+
+            const email = form.querySelector('#email_address');
+            if (email && email.value.trim()) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!re.test(email.value.trim())) {
+                    setFieldError(email, 'Invalid email address');
+                    errors.push(email);
+                }
+            }
+
+            const phone = form.querySelector('#phone_no');
+            if (phone && phone.value.trim()) {
+                const phoneRe = /^[0-9+()\-\s]+$/;
+                if (!phoneRe.test(phone.value.trim())) {
+                    setFieldError(phone, 'Invalid phone number');
+                    errors.push(phone);
+                }
+            }
+
+            const nic = form.querySelector('#nic_number');
+            if (!nic || !nic.value.trim()) {
+                setFieldError(nic, 'NIC is required');
+                errors.push(nic);
+            } else {
+                if (nic.value.trim().length < 9) {
+                    setFieldError(nic, 'NIC looks too short');
+                    errors.push(nic);
+                }
+            }
+
+            const firstDateEl = form.querySelector('#first_appointment_date');
+            const permDateEl = form.querySelector('#permanent_date');
+            if (firstDateEl && permDateEl && firstDateEl.value && permDateEl.value) {
+                if (new Date(permDateEl.value) < new Date(firstDateEl.value)) {
+                    setFieldError(permDateEl, 'Permanent date cannot be before first appointment');
+                    errors.push(permDateEl);
+                }
+            }
+
+            if (errors.length) {
+                errors[0].focus();
+                showMessage('Please fix the highlighted errors.', 'error');
+                return false;
+            }
+
+            return true;
+        }
 
         document.getElementById('staff-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            const form = e.target;
+
+            // Validate fields before sending
+            if (!validateForm(form)) return;
+
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
 
             try {
-                const formData = new FormData(e.target);
+                // ensure Supabase reachable
+                const ok = await checkSupabaseConnection();
+                if (!ok) throw new Error('Cannot reach Supabase');
+
+                const formData = new FormData(form);
                 const data = {};
 
                 // Process all form fields
                 for (let [key, value] of formData.entries()) {
                     if (key.startsWith('child_')) continue; // Skip child fields
-                    
+
                     if (value === '') {
                         data[key] = null;
                     } else if (key === 'is_appointment_permanent') {
@@ -742,7 +846,7 @@
                 if (error) throw error;
 
                 showMessage('✓ Staff member added successfully!', 'success');
-                document.getElementById('staff-form').reset();
+                form.reset();
                 document.getElementById('children-list').innerHTML = '';
                 childCount = 0;
 
