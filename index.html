@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Management System - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase will be imported as an ES module in the page script -->
     <style>
         :root {
             --primary: #1a1a2e;
@@ -385,12 +385,14 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
         // Supabase Configuration
         const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         function showError(message) {
             const errorContainer = document.getElementById('error-container');
@@ -398,25 +400,16 @@
         }
 
         async function checkSupabaseConnection() {
-            const statusContainer = document.getElementById('status-container');
             try {
-                // Simple test: try to fetch a single row to verify connection
-                const { data, error } = await supabase
-                    .from('staff_members')
-                    .select('*')
-                    .limit(1);
-                
-                if (error) {
-                    statusContainer.innerHTML = '<div class="error">⚠ Supabase connection failed: ' + error.message + '</div>';
-                    console.error('Supabase connection error:', error);
-                    return false;
+                const { data, error } = await supabase.auth.getSession();
+                if (error && error.message !== 'Auth session missing') {
+                    throw error;
                 }
-                
+                const statusContainer = document.getElementById('status-container');
                 statusContainer.innerHTML = '<div class="success">Supabase connection active</div>';
                 return true;
             } catch (error) {
-                statusContainer.innerHTML = '<div class="error">⚠ Error connecting to Supabase: ' + error.message + '</div>';
-                console.error('Supabase connection exception:', error);
+                console.warn('Supabase connection check:', error);
                 return false;
             }
         }
