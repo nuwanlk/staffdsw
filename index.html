@@ -309,6 +309,24 @@
             color: var(--accent-light);
             font-family: 'Space Mono', monospace;
         }
+
+        .success {
+            background: rgba(78, 204, 163, 0.1);
+            border: 2px solid var(--success);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: var(--success);
+            font-family: 'Space Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .success::before {
+            content: '✓';
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -325,6 +343,7 @@
             <a href="search.html" class="nav-btn">Search</a>
         </nav>
 
+        <div id="status-container"></div>
         <div id="error-container"></div>
 
         <div class="stats-grid">
@@ -378,7 +397,25 @@
             errorContainer.innerHTML = `<div class="error">${message}</div>`;
         }
 
+        async function checkSupabaseConnection() {
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                if (error && error.message !== 'Auth session missing') {
+                    throw error;
+                }
+                const statusContainer = document.getElementById('status-container');
+                statusContainer.innerHTML = '<div class="success">Supabase connection active</div>';
+                return true;
+            } catch (error) {
+                console.warn('Supabase connection check:', error);
+                return false;
+            }
+        }
+
         async function loadDashboard() {
+            // Check connection first
+            await checkSupabaseConnection();
+            
             try {
                 // Fetch all staff data
                 const { data: staff, error } = await supabase
