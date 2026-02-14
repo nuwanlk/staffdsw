@@ -666,7 +666,7 @@
             childEntry.className = 'child-entry';
             childEntry.id = `child-${childCount}`;
             childEntry.innerHTML = `
-                <button type="button" class="remove-child-btn" onclick="removeChild(${childCount})">Remove</button>
+                <button type="button" class="remove-child-btn" data-child-id="${childCount}">Remove</button>
                 <div class="child-grid">
                     <div class="form-group">
                         <label>Child Name</label>
@@ -687,6 +687,14 @@
                 </div>
             `;
             childrenList.appendChild(childEntry);
+
+            // Attach remove handler directly to avoid inline onclick scoping issues
+            const removeBtn = childEntry.querySelector('.remove-child-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    childEntry.remove();
+                });
+            }
         }
 
         function removeChild(id) {
