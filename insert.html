@@ -1078,7 +1078,7 @@
 
                 // Process all form fields; skip child and qualification sub-fields (they are handled separately)
                 for (let [key, value] of formData.entries()) {
-                    if (key.startsWith('child_') || key.startsWith('qualification_')) continue; // Skip child/qualification fields
+                    if (key.startsWith('child_') || key.startsWith('qualification_') || key.startsWith('disability_')) continue; // Skip child/qualification/disability fields
 
                     if (value === '') {
                         data[key] = null;
