@@ -385,11 +385,7 @@
                 <div class="stat-value" id="female-count">---</div>
                 <div class="stat-description">Female employees</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">This Month</div>
-                <div class="stat-value" id="month-count">---</div>
-                <div class="stat-description">New appointments</div>
-            </div>
+            
             <div class="stat-card clickable" id="retire-card">
                 <div class="stat-label">Retiring (5y)</div>
                 <div class="stat-value" id="retire-count">---</div>
@@ -466,20 +462,13 @@
                 const maleCount = staff.filter(s => s.gender?.toLowerCase() === 'male').length;
                 const femaleCount = staff.filter(s => s.gender?.toLowerCase() === 'female').length;
                 
-                // Count staff added this month
+                // Current time reference
                 const now = new Date();
-                const thisMonth = staff.filter(s => {
-                    if (!s.created_at) return false;
-                    const created = new Date(s.created_at);
-                    return created.getMonth() === now.getMonth() && 
-                           created.getFullYear() === now.getFullYear();
-                }).length;
 
                 // Update stats
                 animateValue('total-staff', 0, totalStaff, 1000);
                 animateValue('male-count', 0, maleCount, 1000);
                 animateValue('female-count', 0, femaleCount, 1000);
-                animateValue('month-count', 0, thisMonth, 1000);
 
                 // Group by designation
                 const designationCounts = {};
