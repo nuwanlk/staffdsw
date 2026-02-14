@@ -667,6 +667,11 @@
                             <option value="No">No</option>
                         </select>
                     </div>
+                    <div class="form-group full-width" id="disabilities-container" style="display:none;">
+                        <label>Disabilities</label>
+                        <div id="disabilities-list"></div>
+                        <button type="button" id="add-disability-btn" class="add-child-btn">+ Add Disability</button>
+                    </div>
                     <div class="form-group">
                         <label for="pension_date">Pension Date</label>
                         <input type="date" id="pension_date" name="pension_date">
@@ -720,6 +725,7 @@
 
         let childCount = 0;
         let qualificationCount = 0;
+        let disabilityCount = 0;
 
         function addChild() {
             childCount++;
@@ -790,6 +796,35 @@
             }
         }
 
+        function addDisability() {
+            disabilityCount++;
+            const list = document.getElementById('disabilities-list');
+            const entry = document.createElement('div');
+            entry.className = 'qualification-entry';
+            entry.id = `disability-${disabilityCount}`;
+            entry.innerHTML = `
+                <button type="button" class="remove-child-btn">Remove</button>
+                <div class="child-grid">
+                    <div class="form-group full-width">
+                        <label>Disability Description</label>
+                        <input type="text" name="disability_desc_${disabilityCount}" class="disability-desc">
+                    </div>
+                    <div class="form-group">
+                        <label>Date Identified</label>
+                        <input type="date" name="disability_date_${disabilityCount}" class="disability-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes / Severity</label>
+                        <input type="text" name="disability_notes_${disabilityCount}" class="disability-notes">
+                    </div>
+                </div>
+            `;
+            list.appendChild(entry);
+
+            const removeBtn = entry.querySelector('.remove-child-btn');
+            if (removeBtn) removeBtn.addEventListener('click', () => entry.remove());
+        }
+
         function removeChild(id) {
             const childEntry = document.getElementById(`child-${id}`);
             if (childEntry) {
@@ -802,6 +837,7 @@
         window.removeChild = removeChild;
         // expose qualification adder for compatibility
         window.addQualification = addQualification;
+        window.addDisability = addDisability;
 
         // --- Pension computation from DOB ---
         function computePensionFromDOB() {
@@ -908,6 +944,20 @@
                 dobInput.addEventListener('change', computePensionFromDOB);
                 dobInput.addEventListener('input', computePensionFromDOB);
             }
+
+            // Disabilities UI toggle and add button
+            const hasDisEl = document.getElementById('has_disability');
+            const disContainer = document.getElementById('disabilities-container');
+            const addDisBtn = document.getElementById('add-disability-btn');
+            if (hasDisEl && disContainer) {
+                function updateDisabilityVisibility() {
+                    if (hasDisEl.value === 'Yes') disContainer.style.display = 'block';
+                    else disContainer.style.display = 'none';
+                }
+                hasDisEl.addEventListener('change', updateDisabilityVisibility);
+                updateDisabilityVisibility();
+            }
+            if (addDisBtn) addDisBtn.addEventListener('click', addDisability);
 
             // Compute pension if DOB already present (edit mode)
             setTimeout(computePensionFromDOB, 200);
@@ -1073,6 +1123,22 @@
 
                 data.education_qualifications = getQualifications();
 
+                // Add disabilities as structured array if provided
+                function getDisabilities() {
+                    const items = [];
+                    for (let i = 1; i <= disabilityCount; i++) {
+                        const el = document.getElementById(`disability-${i}`);
+                        if (!el) continue;
+                        const desc = el.querySelector('.disability-desc')?.value || '';
+                        const date = el.querySelector('.disability-date')?.value || '';
+                        const notes = el.querySelector('.disability-notes')?.value || '';
+                        if (desc || date || notes) items.push({ description: desc, date_identified: date, notes });
+                    }
+                    return items.length ? items : null;
+                }
+
+                data.disabilities = getDisabilities();
+
                 // If editingId is set, update record; otherwise insert
                 if (window.editingId) {
                     const { error } = await supabase
@@ -1109,6 +1175,10 @@
         document.querySelector('.reset-btn').addEventListener('click', () => {
             document.getElementById('children-list').innerHTML = '';
             childCount = 0;
+            document.getElementById('qualifications-list').innerHTML = '';
+            qualificationCount = 0;
+            document.getElementById('disabilities-list').innerHTML = '';
+            disabilityCount = 0;
         });
 
         // --- Edit mode support ---
@@ -1195,6 +1265,32 @@
                         if (descEl) descEl.value = q.description || '';
                         if (instEl) instEl.value = q.institution || '';
                         if (yearEl) yearEl.value = q.year || '';
+                    });
+                }
+
+                // Populate disabilities if any
+                if (data.disabilities && Array.isArray(data.disabilities) && data.disabilities.length > 0) {
+                    document.getElementById('disabilities-list').innerHTML = '';
+                    disabilityCount = 0;
+                    // ensure has_disability shows Yes
+                    const hasDisEl = document.getElementById('has_disability');
+                    if (hasDisEl) hasDisEl.value = 'Yes';
+                    data.disabilities.forEach(d => {
+                        addDisability();
+                        const dEntry = document.getElementById(`disability-${disabilityCount}`);
+                        if (!dEntry) return;
+                        const descEl = dEntry.querySelector('.disability-desc');
+                        const dateEl = dEntry.querySelector('.disability-date');
+                        const notesEl = dEntry.querySelector('.disability-notes');
+                        if (descEl) descEl.value = d.description || '';
+                        if (dateEl) {
+                            if (d.date_identified) {
+                                const dd = new Date(d.date_identified);
+                                if (!isNaN(dd)) dateEl.value = dd.toISOString().slice(0,10);
+                                else dateEl.value = d.date_identified;
+                            }
+                        }
+                        if (notesEl) notesEl.value = d.notes || '';
                     });
                 }
 
