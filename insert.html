@@ -622,13 +622,10 @@
                 <!-- Leave Information -->
                 <div class="section-title">Leave Information</div>
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="leave_from_date">Leave From Date</label>
-                        <input type="date" id="leave_from_date" name="leave_from_date">
-                    </div>
-                    <div class="form-group">
-                        <label for="leave_to_date">Leave To Date</label>
-                        <input type="date" id="leave_to_date" name="leave_to_date">
+                    <div class="form-group full-width">
+                        <label>Leaves</label>
+                        <div id="leaves-list"></div>
+                        <button type="button" id="add-leave-btn" class="add-child-btn">+ Add Leave</button>
                     </div>
                 </div>
 
@@ -726,6 +723,7 @@
         let childCount = 0;
         let qualificationCount = 0;
         let disabilityCount = 0;
+        let leaveCount = 0;
 
         function addChild() {
             childCount++;
@@ -817,6 +815,35 @@
             if (removeBtn) removeBtn.addEventListener('click', () => entry.remove());
         }
 
+        function addLeave() {
+            leaveCount++;
+            const list = document.getElementById('leaves-list');
+            const entry = document.createElement('div');
+            entry.className = 'qualification-entry';
+            entry.id = `leave-${leaveCount}`;
+            entry.innerHTML = `
+                <button type="button" class="remove-child-btn">Remove</button>
+                <div class="child-grid">
+                    <div class="form-group">
+                        <label>Leave Type</label>
+                        <input type="text" name="leave_type_${leaveCount}" class="leave-type">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" name="leave_start_${leaveCount}" class="leave-start">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" name="leave_end_${leaveCount}" class="leave-end">
+                    </div>
+                </div>
+            `;
+            list.appendChild(entry);
+
+            const removeBtn = entry.querySelector('.remove-child-btn');
+            if (removeBtn) removeBtn.addEventListener('click', () => entry.remove());
+        }
+
         function removeChild(id) {
             const childEntry = document.getElementById(`child-${id}`);
             if (childEntry) {
@@ -830,6 +857,7 @@
         // expose qualification adder for compatibility
         window.addQualification = addQualification;
         window.addDisability = addDisability;
+        window.addLeave = addLeave;
 
         // --- Pension computation from DOB ---
         function computePensionFromDOB() {
@@ -950,6 +978,8 @@
                 updateDisabilityVisibility();
             }
             if (addDisBtn) addDisBtn.addEventListener('click', addDisability);
+            const addLeaveBtn = document.getElementById('add-leave-btn');
+            if (addLeaveBtn) addLeaveBtn.addEventListener('click', addLeave);
 
             // Compute pension if DOB already present (edit mode)
             setTimeout(computePensionFromDOB, 200);
@@ -1078,7 +1108,7 @@
 
                 // Process all form fields; skip child and qualification sub-fields (they are handled separately)
                 for (let [key, value] of formData.entries()) {
-                    if (key.startsWith('child_') || key.startsWith('qualification_') || key.startsWith('disability_')) continue; // Skip child/qualification/disability fields
+                    if (key.startsWith('child_') || key.startsWith('qualification_') || key.startsWith('disability_') || key.startsWith('leave_')) continue; // Skip child/qualification/disability/leave fields
 
                     if (value === '') {
                         data[key] = null;
@@ -1114,6 +1144,22 @@
                 }
 
                 data.education_qualifications = getQualifications();
+
+                // Add leaves as structured array (jsonb)
+                function getLeaves() {
+                    const items = [];
+                    for (let i = 1; i <= leaveCount; i++) {
+                        const el = document.getElementById(`leave-${i}`);
+                        if (!el) continue;
+                        const type = el.querySelector('.leave-type')?.value || '';
+                        const start = el.querySelector('.leave-start')?.value || '';
+                        const end = el.querySelector('.leave-end')?.value || '';
+                        if (type || start || end) items.push({ type, start_date: start || null, end_date: end || null });
+                    }
+                    return items.length ? items : null;
+                }
+
+                data.leave_information = getLeaves();
 
                 // Add disabilities as structured array if provided
                 function getDisabilities() {
@@ -1169,6 +1215,8 @@
             qualificationCount = 0;
             document.getElementById('disabilities-list').innerHTML = '';
             disabilityCount = 0;
+            document.getElementById('leaves-list').innerHTML = '';
+            leaveCount = 0;
         });
 
         // --- Edit mode support ---
@@ -1255,6 +1303,23 @@
                         if (descEl) descEl.value = q.description || '';
                         if (instEl) instEl.value = q.institution || '';
                         if (yearEl) yearEl.value = q.year || '';
+                    });
+                }
+
+                // Populate leave_information if any
+                if (data.leave_information && Array.isArray(data.leave_information) && data.leave_information.length > 0) {
+                    document.getElementById('leaves-list').innerHTML = '';
+                    leaveCount = 0;
+                    data.leave_information.forEach(l => {
+                        addLeave();
+                        const le = document.getElementById(`leave-${leaveCount}`);
+                        if (!le) return;
+                        const typeEl = le.querySelector('.leave-type');
+                        const startEl = le.querySelector('.leave-start');
+                        const endEl = le.querySelector('.leave-end');
+                        if (typeEl) typeEl.value = l.type || l.leave_type || '';
+                        if (startEl && l.start_date) startEl.value = (new Date(l.start_date)).toISOString().slice(0,10);
+                        if (endEl && l.end_date) endEl.value = (new Date(l.end_date)).toISOString().slice(0,10);
                     });
                 }
 
