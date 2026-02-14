@@ -439,6 +439,24 @@
             border-left: 2px solid var(--accent);
             font-size: 0.9rem;
         }
+        /* Mobile responsiveness */
+        @media (max-width: 800px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2.2rem; }
+            .subtitle { font-size: 1rem; }
+            nav { flex-direction: column; gap: 0.5rem; }
+            .nav-btn { width: 100%; padding: 0.8rem 1rem; }
+            .search-grid { grid-template-columns: 1fr; }
+            .staff-details { grid-template-columns: 1fr; }
+            .staff-card { padding: 1rem; }
+            .staff-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .staff-id { text-align: left; }
+            .search-buttons { flex-direction: column; }
+            .search-btn, .clear-btn, .export-btn { width: 100%; }
+            .expand-btn { width: 100%; margin-top: 0.75rem; }
+            .children-list .child-item { font-size: 0.95rem; }
+            .results-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
     </style>
 </head>
 <body>

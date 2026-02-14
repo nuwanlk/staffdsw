@@ -400,6 +400,22 @@
             margin-top: 0.35rem;
             display: block;
         }
+        /* Mobile responsiveness */
+        @media (max-width: 800px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2.2rem; }
+            .subtitle { font-size: 1rem; }
+            nav { flex-direction: column; gap: 0.5rem; }
+            .nav-btn { width: 100%; padding: 0.8rem 1rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .children-container, #qualifications-list { width: 100%; }
+            .child-entry, .qualification-entry { padding: 1rem; }
+            .button-group { flex-direction: column; }
+            .submit-btn, .reset-btn { width: 100%; }
+            .add-child-btn { width: 100%; }
+            label { font-size: 0.85rem; }
+            input, textarea, select { font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
