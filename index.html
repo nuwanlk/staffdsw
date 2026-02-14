@@ -188,6 +188,8 @@
         /* popup list inside stat card */
         #retire-popup .popup-item { padding: 0.4rem 0; border-bottom: 1px dashed var(--border); font-size: 0.9rem; }
         #retire-popup .popup-item:last-child { border-bottom: none; }
+        #increment-popup .popup-item { padding: 0.4rem 0; border-bottom: 1px dashed var(--border); font-size: 0.9rem; }
+        #increment-popup .popup-item:last-child { border-bottom: none; }
 
         .stat-label {
             font-family: 'Space Mono', monospace;
@@ -385,6 +387,12 @@
                 <div class="stat-value" id="female-count">---</div>
                 <div class="stat-description">Female employees</div>
             </div>
+            <div class="stat-card clickable" id="increment-card">
+                <div class="stat-label">Increment (30d)</div>
+                <div class="stat-value" id="increment-count">---</div>
+                <div class="stat-description">Upcoming increment anniversaries</div>
+                <div id="increment-popup" style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;"></div>
+            </div>
             
             <div class="stat-card clickable" id="retire-card">
                 <div class="stat-label">Retiring (5y)</div>
@@ -524,6 +532,28 @@
                 window.retiringListGlobal = retiringList;
                 renderRetiringSoon(retiringList.slice(0, 20));
 
+                                // Compute upcoming increment anniversaries within next 30 days
+                                const cutoff30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                const incrementList = staff.map(s => {
+                                        const fa = s.first_appointment_date || s.first_appointment || s.first_appointed_date;
+                                        if (!fa) return { record: s, nextIncrement: null };
+                                        const d = new Date(fa);
+                                        if (isNaN(d)) return { record: s, nextIncrement: null };
+                                        // Build next occurrence this year
+                                        let next = new Date(now.getFullYear(), d.getMonth(), d.getDate());
+                                        // If the anniversary this year has already passed (strictly before today), use next year
+                                        if (next < now) next = new Date(now.getFullYear() + 1, d.getMonth(), d.getDate());
+                                        return { record: s, nextIncrement: next };
+                                }).filter(x => x.nextIncrement && x.nextIncrement >= now && x.nextIncrement <= cutoff30)
+                                    .sort((a, b) => a.nextIncrement - b.nextIncrement);
+
+                                const incrementCount = incrementList.length;
+                                const incEl = document.getElementById('increment-count');
+                                if (incEl) incEl.textContent = String(incrementCount);
+                                animateValue('increment-count', 0, incrementCount, 800);
+                                window.incrementListGlobal = incrementList;
+                                renderIncrements(incrementList.slice(0, 50));
+
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 showError('Failed to load dashboard data. Please check your Supabase configuration.');
@@ -616,6 +646,25 @@
             container.innerHTML = list.map(item => {
                 const s = item.record;
                 const pd = item.pensionDate ? new Date(item.pensionDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown';
+                return `
+                    <div class="activity-item">
+                        <div class="activity-time">${pd}</div>
+                        <div class="activity-text"><strong>${s.name_with_initials || 'Unknown'}</strong> — ${s.designation || 'Staff'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderIncrements(list) {
+            const container = document.getElementById('increments-soon');
+            if (!container) return;
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div class="activity-item"><div class="activity-text">No upcoming increments within 30 days</div></div>';
+                return;
+            }
+            container.innerHTML = list.map(item => {
+                const s = item.record;
+                const pd = item.nextIncrement ? new Date(item.nextIncrement).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown';
                 return `
                     <div class="activity-item">
                         <div class="activity-time">${pd}</div>
