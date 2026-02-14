@@ -516,8 +516,9 @@
                 <div class="section-title">Education & Qualifications</div>
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="education_qualifications">Education Qualifications</label>
-                        <textarea id="education_qualifications" name="education_qualifications"></textarea>
+                        <label>Education Qualifications</label>
+                        <div id="qualifications-list"></div>
+                        <button type="button" id="add-qualification-btn" class="add-child-btn">+ Add Qualification</button>
                     </div>
                 </div>
 
@@ -658,6 +659,7 @@
         }
 
         let childCount = 0;
+        let qualificationCount = 0;
 
         function addChild() {
             childCount++;
@@ -697,6 +699,37 @@
             }
         }
 
+        function addQualification() {
+            qualificationCount++;
+            const list = document.getElementById('qualifications-list');
+            const entry = document.createElement('div');
+            entry.className = 'child-entry';
+            entry.id = `qualification-${qualificationCount}`;
+            entry.innerHTML = `
+                <button type="button" class="remove-child-btn">Remove</button>
+                <div class="child-grid">
+                    <div class="form-group">
+                        <label>Qualification</label>
+                        <input type="text" name="qualification_desc_${qualificationCount}" class="qualification-desc">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" name="qualification_institution_${qualificationCount}" class="qualification-institution">
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="text" name="qualification_year_${qualificationCount}" class="qualification-year">
+                    </div>
+                </div>
+            `;
+            list.appendChild(entry);
+
+            const removeBtn = entry.querySelector('.remove-child-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => entry.remove());
+            }
+        }
+
         function removeChild(id) {
             const childEntry = document.getElementById(`child-${id}`);
             if (childEntry) {
@@ -707,6 +740,8 @@
         // Expose to global scope so inline onclick attributes work (module scope is not global)
         window.addChild = addChild;
         window.removeChild = removeChild;
+        // expose qualification adder for compatibility
+        window.addQualification = addQualification;
 
         function showMessage(message, type) {
             const messageContainer = document.getElementById('message-container');
@@ -829,9 +864,9 @@
                 const formData = new FormData(form);
                 const data = {};
 
-                // Process all form fields
+                // Process all form fields; skip child and qualification sub-fields (they are handled separately)
                 for (let [key, value] of formData.entries()) {
-                    if (key.startsWith('child_')) continue; // Skip child fields
+                    if (key.startsWith('child_') || key.startsWith('qualification_')) continue; // Skip child/qualification fields
 
                     if (value === '') {
                         data[key] = null;
@@ -849,6 +884,24 @@
 
                 // Add children data
                 data.children = getChildren();
+
+                // Add qualifications as structured array
+                function getQualifications() {
+                    const quals = [];
+                    for (let i = 1; i <= qualificationCount; i++) {
+                        const el = document.getElementById(`qualification-${i}`);
+                        if (!el) continue;
+                        const desc = el.querySelector('.qualification-desc')?.value || '';
+                        const inst = el.querySelector('.qualification-institution')?.value || '';
+                        const year = el.querySelector('.qualification-year')?.value || '';
+                        if (desc || inst || year) {
+                            quals.push({ description: desc, institution: inst, year: year });
+                        }
+                    }
+                    return quals.length ? quals : null;
+                }
+
+                data.education_qualifications = getQualifications();
 
                 // If editingId is set, update record; otherwise insert
                 if (window.editingId) {
@@ -941,6 +994,23 @@
                     });
                 }
 
+                // Populate qualifications if any
+                if (data.education_qualifications && Array.isArray(data.education_qualifications) && data.education_qualifications.length > 0) {
+                    document.getElementById('qualifications-list').innerHTML = '';
+                    qualificationCount = 0;
+                    data.education_qualifications.forEach(q => {
+                        addQualification();
+                        const qEntry = document.getElementById(`qualification-${qualificationCount}`);
+                        if (!qEntry) return;
+                        const descEl = qEntry.querySelector('.qualification-desc');
+                        const instEl = qEntry.querySelector('.qualification-institution');
+                        const yearEl = qEntry.querySelector('.qualification-year');
+                        if (descEl) descEl.value = q.description || '';
+                        if (instEl) instEl.value = q.institution || '';
+                        if (yearEl) yearEl.value = q.year || '';
+                    });
+                }
+
                 // Set editing flag and update UI
                 window.editingId = id;
                 const submitBtn = document.getElementById('submit-btn');
@@ -960,6 +1030,9 @@
                 // Attempt to load record for edit (don't block page)
                 loadStaffForEdit(id);
             }
+            // Attach qualification add button
+            const addQBtn = document.getElementById('add-qualification-btn');
+            if (addQBtn) addQBtn.addEventListener('click', addQualification);
         });
     </script>
 </body>
