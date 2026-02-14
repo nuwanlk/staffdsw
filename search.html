@@ -746,9 +746,13 @@
                             <div class="detail-label">Qualifications</div>
                             <div class="detail-value">
                                 ${Array.isArray(staff.education_qualifications) ? `
-                                    <div>
+                                    <div class="children-list">
                                         ${staff.education_qualifications.map(q => `
-                                            <div style="margin-bottom:6px;">${q.description || ''}${q.institution ? ' — ' + q.institution : ''}${q.year ? ' (' + q.year + ')' : ''}</div>
+                                            <div class="child-item">
+                                                <strong>${q.description || 'N/A'}</strong>
+                                                ${q.institution ? `<div style="margin-top:6px;color:var(--text);">${q.institution}</div>` : ''}
+                                                ${q.year ? `<div style="margin-top:4px;color:var(--text-dim);">${q.year}</div>` : ''}
+                                            </div>
                                         `).join('')}
                                     </div>
                                 ` : `${staff.education_qualifications}`}
