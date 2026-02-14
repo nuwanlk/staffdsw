@@ -1035,6 +1035,8 @@
                         .eq('id', window.editingId);
                     if (error) throw error;
                     showMessage('✓ Staff member updated successfully!', 'success');
+                    // refresh designation suggestions cache in case designation changed
+                    await loadDesignations();
                 } else {
                     const { error } = await supabase
                         .from('staff_members')
@@ -1044,6 +1046,8 @@
                     form.reset();
                     document.getElementById('children-list').innerHTML = '';
                     childCount = 0;
+                    // refresh designation suggestions so newly added designation appears
+                    await loadDesignations();
                 }
 
             } catch (error) {
