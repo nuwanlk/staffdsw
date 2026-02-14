@@ -383,6 +383,11 @@
                 <div class="stat-value" id="month-count">---</div>
                 <div class="stat-description">New appointments</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-label">Retiring (5y)</div>
+                <div class="stat-value" id="retire-count">---</div>
+                <div class="stat-description">Employees retiring within 5 years</div>
+            </div>
         </div>
 
         <div class="chart-section">
@@ -398,6 +403,11 @@
         <div class="recent-activity">
             <div class="chart-title">Recent Additions</div>
             <div id="recent-activity"></div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-title">Retiring Soon (next 5 years)</div>
+            <div id="retiring-soon"></div>
         </div>
     </div>
 
@@ -484,6 +494,33 @@
                 // Render recent activity
                 renderRecentActivity(staff.slice(0, 5));
 
+                // Compute employees retiring within next 5 years
+                const now = new Date();
+                const cutoff = new Date(now.getFullYear() + 5, now.getMonth(), now.getDate());
+
+                const retiringList = staff.map(s => {
+                    let pensionDate = null;
+                    // Prefer explicit pension_date if provided
+                    if (s.pension_date) {
+                        const pd = new Date(s.pension_date);
+                        if (!isNaN(pd)) pensionDate = pd;
+                    }
+                    // Otherwise compute from date_of_birth or common alternate fields
+                    if (!pensionDate) {
+                        const dobVal = s.date_of_birth || s.dob || s.birthday || s.birth_date || s['date-of-birth'];
+                        if (dobVal) {
+                            const d = new Date(dobVal);
+                            if (!isNaN(d)) pensionDate = new Date(d.getFullYear() + 55, d.getMonth(), d.getDate());
+                        }
+                    }
+                    return { record: s, pensionDate };
+                }).filter(x => x.pensionDate && x.pensionDate >= now && x.pensionDate <= cutoff)
+                  .sort((a, b) => a.pensionDate - b.pensionDate);
+
+                const retiringCount = retiringList.length;
+                animateValue('retire-count', 0, retiringCount, 1000);
+                renderRetiringSoon(retiringList.slice(0, 20));
+
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 showError('Failed to load dashboard data. Please check your Supabase configuration.');
@@ -557,6 +594,27 @@
                             <strong>${s.name_with_initials || 'Unknown'}</strong> added as 
                             ${s.designation || 'Staff Member'}
                         </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRetiringSoon(list) {
+            const container = document.getElementById('retiring-soon');
+            if (!container) return;
+
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div class="activity-item"><div class="activity-text">No employees retiring within next 5 years</div></div>';
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const s = item.record;
+                const pd = item.pensionDate ? new Date(item.pensionDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown';
+                return `
+                    <div class="activity-item">
+                        <div class="activity-time">${pd}</div>
+                        <div class="activity-text"><strong>${s.name_with_initials || 'Unknown'}</strong> — ${s.designation || 'Staff'}</div>
                     </div>
                 `;
             }).join('');
