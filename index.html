@@ -496,7 +496,8 @@
 
                 // Compute employees retiring within next 5 years
                 const cutoff = new Date(now.getFullYear() + 5, now.getMonth(), now.getDate());
-
+                // include the current calendar year (start of year) so retirements earlier this year are counted
+                const startOfYear = new Date(now.getFullYear(), 0, 1);
                 const retiringList = staff.map(s => {
                     let pensionDate = null;
                     // Prefer explicit pension_date if provided
@@ -513,7 +514,7 @@
                         }
                     }
                     return { record: s, pensionDate };
-                }).filter(x => x.pensionDate && x.pensionDate >= now && x.pensionDate <= cutoff)
+                                }).filter(x => x.pensionDate && x.pensionDate >= startOfYear && x.pensionDate <= cutoff)
                   .sort((a, b) => a.pensionDate - b.pensionDate);
 
                 const retiringCount = retiringList.length;
