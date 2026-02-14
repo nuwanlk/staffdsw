@@ -256,6 +256,14 @@
             position: relative;
         }
 
+        .qualification-entry {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
         .child-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -703,7 +711,7 @@
             qualificationCount++;
             const list = document.getElementById('qualifications-list');
             const entry = document.createElement('div');
-            entry.className = 'child-entry';
+            entry.className = 'qualification-entry';
             entry.id = `qualification-${qualificationCount}`;
             entry.innerHTML = `
                 <button type="button" class="remove-child-btn">Remove</button>
