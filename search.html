@@ -609,6 +609,16 @@
                             staff.education_qualifications = q;
                         }
                     }
+                    // Normalize disabilities field: parse JSON strings to arrays when necessary
+                    const d = staff.disabilities;
+                    if (typeof d === 'string' && d.trim()) {
+                        try {
+                            const parsedD = JSON.parse(d);
+                            staff.disabilities = parsedD;
+                        } catch (e) {
+                            staff.disabilities = d;
+                        }
+                    }
                 });
 
                 currentResults = data;
@@ -874,6 +884,18 @@
                                 <div class="detail-value">${new Date(staff.pension_date).toLocaleDateString()}</div>
                             </div>
                             ` : ''}
+                                ${staff.disabilities && Array.isArray(staff.disabilities) ? `
+                                <div class="detail-group">
+                                    <div class="detail-label">Disabilities</div>
+                                    <div class="children-list">
+                                        ${staff.disabilities.map(dis => `
+                                            <div class="child-item">
+                                                <strong>${dis.description || dis || 'N/A'}</strong>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                ` : ''}
                             ${staff.resignation_date ? `
                             <div class="detail-group">
                                 <div class="detail-label">Resignation Date</div>
