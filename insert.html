@@ -1145,6 +1145,19 @@
                     }
                 });
 
+                // If date_of_birth input is empty, attempt to populate from common alternate field names
+                try {
+                    const dobEl = document.getElementById('date_of_birth');
+                    if (dobEl && !dobEl.value) {
+                        const alt = data.date_of_birth || data.dob || data.birthday || data.birth_date || data['date-of-birth'];
+                        if (alt) {
+                            const d = new Date(alt);
+                            if (!isNaN(d)) dobEl.value = d.toISOString().slice(0,10);
+                            else dobEl.value = alt;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+
                 // Populate children if any
                 if (data.children && Array.isArray(data.children) && data.children.length > 0) {
                     document.getElementById('children-list').innerHTML = '';
