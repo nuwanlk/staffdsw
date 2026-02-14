@@ -700,74 +700,6 @@
         window.addChild = addChild;
         window.removeChild = removeChild;
 
-        // --- Minimal auth UI for insert page ---
-        function initAuthUI() {
-            // create small auth controls if not present
-            const container = document.createElement('div');
-            container.style.position = 'absolute';
-            container.style.top = '1.5rem';
-            container.style.right = '2rem';
-            container.style.zIndex = 2;
-            container.innerHTML = `
-                <div id="auth-logged-out-inline" style="display:none;">
-                    <input id="auth-email-inline" type="email" placeholder="email" style="padding:6px;margin-right:6px;" />
-                    <input id="auth-password-inline" type="password" placeholder="password" style="padding:6px;margin-right:6px;" />
-                    <button id="auth-signin-inline" class="nav-btn" style="padding:6px 10px;">Sign in</button>
-                </div>
-                <div id="auth-logged-in-inline" style="display:none; align-items:center; gap:8px;">
-                    <span id="auth-user-inline" style="font-family: 'Space Mono', monospace; color:var(--text-dim); margin-right:8px;"></span>
-                    <button id="auth-signout-inline" class="nav-btn" style="padding:6px 10px;">Sign out</button>
-                </div>
-            `;
-            document.body.appendChild(container);
-
-            const signinBtn = document.getElementById('auth-signin-inline');
-            const signoutBtn = document.getElementById('auth-signout-inline');
-            const emailIn = document.getElementById('auth-email-inline');
-            const passIn = document.getElementById('auth-password-inline');
-            const loggedOutDiv = document.getElementById('auth-logged-out-inline');
-            const loggedInDiv = document.getElementById('auth-logged-in-inline');
-            const userSpan = document.getElementById('auth-user-inline');
-
-            async function update() {
-                const s = (await supabase.auth.getSession()).data.session;
-                if (s && s.user) {
-                    loggedOutDiv.style.display = 'none';
-                    loggedInDiv.style.display = 'flex';
-                    userSpan.textContent = s.user.email || s.user.id;
-                } else {
-                    loggedOutDiv.style.display = 'block';
-                    loggedInDiv.style.display = 'none';
-                    userSpan.textContent = '';
-                }
-            }
-
-            if (signinBtn) signinBtn.addEventListener('click', async () => {
-                const email = emailIn.value.trim();
-                const password = passIn.value;
-                if (!email || !password) return alert('Enter email and password');
-                signinBtn.disabled = true;
-                try {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    await update();
-                } catch (err) {
-                    console.error('signin inline', err);
-                    alert('Sign-in failed: ' + (err.message || err));
-                } finally { signinBtn.disabled = false; }
-            });
-
-            if (signoutBtn) signoutBtn.addEventListener('click', async () => {
-                await supabase.auth.signOut();
-                await update();
-            });
-
-            supabase.auth.onAuthStateChange(() => update());
-            update();
-        }
-
-        window.initAuthUI = initAuthUI;
-
         function showMessage(message, type) {
             const messageContainer = document.getElementById('message-container');
             messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
@@ -911,15 +843,6 @@
                 data.children = getChildren();
 
                 // If editingId is set, update record; otherwise insert
-                // Ensure we attach created_by from current session when inserting
-                const sessionResp = await supabase.auth.getSession();
-                const session = sessionResp.data.session;
-                if (!window.editingId) {
-                    if (session && session.user && session.user.id) {
-                        data.created_by = session.user.id;
-                    }
-                }
-
                 if (window.editingId) {
                     const { error } = await supabase
                         .from('staff_members')
@@ -1029,9 +952,6 @@
                 // Attempt to load record for edit (don't block page)
                 loadStaffForEdit(id);
             }
-            // Init auth UI
-            initAuthUI();
-        });
         });
     </script>
 </body>
