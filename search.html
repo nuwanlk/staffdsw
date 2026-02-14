@@ -794,7 +794,24 @@
                             ` : ''}
                         </div>
                         ` : ''}
-                        
+                        ${staff.leave_information && Array.isArray(staff.leave_information) && staff.leave_information.length > 0 ? `
+                        <div class="section-subtitle">Leave Information</div>
+                        <div class="detail-group">
+                            <div class="detail-label">Leaves</div>
+                            <div class="detail-value">
+                                <div class="children-list">
+                                    ${staff.leave_information.map(li => `
+                                        <div class="child-item">
+                                            <strong>${li.type || li.leave_type || 'N/A'}</strong>
+                                            ${li.start_date ? ` <div style="margin-top:6px;color:var(--text);">From: ${new Date(li.start_date).toLocaleDateString()}</div>` : ''}
+                                            ${li.end_date ? ` <div style="margin-top:4px;color:var(--text-dim);">To: ${new Date(li.end_date).toLocaleDateString()}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
                         ${staff.education_qualifications ? `
                         <div class="section-subtitle">Education</div>
                         <div class="detail-group">
