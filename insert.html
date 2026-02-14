@@ -838,17 +838,24 @@
                 // Add children data
                 data.children = getChildren();
 
-                // Insert into Supabase
-                const { error } = await supabase
-                    .from('staff_members')
-                    .insert([data]);
-
-                if (error) throw error;
-
-                showMessage('✓ Staff member added successfully!', 'success');
-                form.reset();
-                document.getElementById('children-list').innerHTML = '';
-                childCount = 0;
+                // If editingId is set, update record; otherwise insert
+                if (window.editingId) {
+                    const { error } = await supabase
+                        .from('staff_members')
+                        .update(data)
+                        .eq('id', window.editingId);
+                    if (error) throw error;
+                    showMessage('✓ Staff member updated successfully!', 'success');
+                } else {
+                    const { error } = await supabase
+                        .from('staff_members')
+                        .insert([data]);
+                    if (error) throw error;
+                    showMessage('✓ Staff member added successfully!', 'success');
+                    form.reset();
+                    document.getElementById('children-list').innerHTML = '';
+                    childCount = 0;
+                }
 
             } catch (error) {
                 console.error('Error adding staff:', error);
@@ -863,6 +870,84 @@
         document.querySelector('.reset-btn').addEventListener('click', () => {
             document.getElementById('children-list').innerHTML = '';
             childCount = 0;
+        });
+
+        // --- Edit mode support ---
+        window.editingId = null;
+
+        async function loadStaffForEdit(id) {
+            try {
+                const { data, error } = await supabase.from('staff_members').select('*').eq('id', id).single();
+                if (error) throw error;
+                if (!data) return;
+
+                // Populate simple fields by id
+                Object.keys(data).forEach(key => {
+                    if (key === 'children' || key === 'id' || key === 'created_at') return;
+                    const el = document.getElementById(key);
+                    if (el) {
+                        if (el.type === 'checkbox') {
+                            el.checked = Boolean(data[key]);
+                        } else {
+                            // For date inputs, ensure format yyyy-mm-dd
+                            if (el.type === 'date' && data[key]) {
+                                // Try to parse ISO date
+                                const d = new Date(data[key]);
+                                if (!isNaN(d)) {
+                                    const iso = d.toISOString().slice(0,10);
+                                    el.value = iso;
+                                } else {
+                                    el.value = data[key];
+                                }
+                            } else {
+                                el.value = data[key] === null ? '' : data[key];
+                            }
+                        }
+                    }
+                });
+
+                // Populate children if any
+                if (data.children && Array.isArray(data.children) && data.children.length > 0) {
+                    document.getElementById('children-list').innerHTML = '';
+                    childCount = 0;
+                    data.children.forEach(child => {
+                        addChild();
+                        const entry = document.getElementById(`child-${childCount}`);
+                        if (!entry) return;
+                        const nameEl = entry.querySelector('.child-name');
+                        const dobEl = entry.querySelector('.child-dob');
+                        const genderEl = entry.querySelector('.child-gender');
+                        if (nameEl) nameEl.value = child.name || '';
+                        if (dobEl) {
+                            if (child.date_of_birth) {
+                                const d = new Date(child.date_of_birth);
+                                if (!isNaN(d)) dobEl.value = d.toISOString().slice(0,10);
+                                else dobEl.value = child.date_of_birth;
+                            }
+                        }
+                        if (genderEl) genderEl.value = child.gender || '';
+                    });
+                }
+
+                // Set editing flag and update UI
+                window.editingId = id;
+                const submitBtn = document.getElementById('submit-btn');
+                if (submitBtn) submitBtn.innerHTML = 'Update';
+
+            } catch (err) {
+                console.error('Load for edit failed:', err);
+                showMessage('✗ Failed to load staff for editing', 'error');
+            }
+        }
+
+        // On load, check for id query param
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (id) {
+                // Attempt to load record for edit (don't block page)
+                loadStaffForEdit(id);
+            }
         });
     </script>
 </body>
