@@ -517,6 +517,9 @@
                   .sort((a, b) => a.pensionDate - b.pensionDate);
 
                 const retiringCount = retiringList.length;
+                console.debug('Retiring count computed:', retiringCount);
+                const retireEl = document.getElementById('retire-count');
+                if (retireEl) retireEl.textContent = String(retiringCount);
                 animateValue('retire-count', 0, retiringCount, 1000);
                 renderRetiringSoon(retiringList.slice(0, 20));
 
@@ -528,10 +531,12 @@
 
         function animateValue(id, start, end, duration) {
             const element = document.getElementById(id);
+            if (!element) return;
             const range = end - start;
             const increment = range / (duration / 16);
             let current = start;
-
+            // If no change, set immediately
+            if (start === end) { element.textContent = String(Math.floor(end)); return; }
             const timer = setInterval(() => {
                 current += increment;
                 if (current >= end) {
