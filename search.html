@@ -558,6 +558,20 @@
 
                 if (error) throw error;
 
+                // Normalize qualifications field: parse JSON strings to arrays when necessary
+                data.forEach(staff => {
+                    const q = staff.education_qualifications;
+                    if (typeof q === 'string' && q.trim()) {
+                        try {
+                            const parsed = JSON.parse(q);
+                            staff.education_qualifications = parsed;
+                        } catch (e) {
+                            // keep as string if parse fails
+                            staff.education_qualifications = q;
+                        }
+                    }
+                });
+
                 currentResults = data;
                 displayResults(data);
 
