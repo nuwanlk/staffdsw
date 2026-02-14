@@ -500,6 +500,10 @@
                     <input type="text" id="search-grade" placeholder="Search by grade...">
                 </div>
                 <div class="search-group">
+                    <label for="search-dob">Date of Birth</label>
+                    <input type="date" id="search-dob" placeholder="Search by DOB...">
+                </div>
+                <div class="search-group">
                     <label for="search-gender">Gender</label>
                     <select id="search-gender">
                         <option value="">All</option>
@@ -563,6 +567,7 @@
                 const designation = document.getElementById('search-designation').value.trim();
                 const grade = document.getElementById('search-grade').value.trim();
                 const gender = document.getElementById('search-gender').value;
+                const dob = document.getElementById('search-dob')?.value;
                 const nic = document.getElementById('search-nic').value.trim();
                 const marital = document.getElementById('search-marital').value;
 
@@ -577,6 +582,9 @@
                 }
                 if (gender) {
                     query = query.eq('gender', gender);
+                }
+                if (dob) {
+                    query = query.eq('date_of_birth', dob);
                 }
                 if (nic) {
                     query = query.ilike('nic_number', `%${nic}%`);
@@ -650,6 +658,12 @@
                         <div class="detail-group">
                             <div class="detail-label">Gender</div>
                             <div class="detail-value">${staff.gender}</div>
+                        </div>
+                        ` : ''}
+                        ${staff.date_of_birth ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Date of Birth</div>
+                            <div class="detail-value">${new Date(staff.date_of_birth).toLocaleDateString()}</div>
                         </div>
                         ` : ''}
                         ${staff.nic_number ? `

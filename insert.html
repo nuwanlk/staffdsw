@@ -471,6 +471,10 @@
                         <input type="text" id="name_with_initials" name="name_with_initials" required>
                     </div>
                     <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth">
+                    </div>
+                    <div class="form-group">
                         <label for="name_full_sinhala">Full Name (Sinhala)</label>
                         <input type="text" id="name_full_sinhala" name="name_full_sinhala">
                     </div>
@@ -666,6 +670,7 @@
                     <div class="form-group">
                         <label for="pension_date">Pension Date</label>
                         <input type="date" id="pension_date" name="pension_date">
+                        <div id="computed-pension-key" style="margin-top:6px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.9rem;"></div>
                     </div>
                     <div class="form-group">
                         <label for="resignation_date">Resignation Date</label>
@@ -798,6 +803,31 @@
         // expose qualification adder for compatibility
         window.addQualification = addQualification;
 
+        // --- Pension computation from DOB ---
+        function computePensionFromDOB() {
+            const dobInput = document.getElementById('date_of_birth');
+            const keyEl = document.getElementById('computed-pension-key');
+            const pensionInput = document.getElementById('pension_date');
+            if (!dobInput || !keyEl) return;
+            const v = dobInput.value;
+            if (!v) {
+                keyEl.textContent = '';
+                return;
+            }
+            const d = new Date(v);
+            if (isNaN(d)) {
+                keyEl.textContent = '';
+                return;
+            }
+            const pension = new Date(d.getFullYear() + 55, d.getMonth(), d.getDate());
+            const display = pension.toLocaleDateString();
+            keyEl.textContent = `Pension date (auto): ${display}`;
+            // If pension_date not set, set placeholder to computed value
+            if (pensionInput && !pensionInput.value) {
+                pensionInput.placeholder = pension.toISOString().slice(0,10);
+            }
+        }
+
         // --- Designation autocomplete ---
         let designationsCache = [];
         let designationDebounce = null;
@@ -872,6 +902,15 @@
                 desInput.addEventListener('focus', (e) => debounceShowDesignation(e.target.value));
                 desInput.addEventListener('blur', () => setTimeout(() => { if (desContainer) desContainer.style.display = 'none'; }, 200));
             }
+            // Attach DOB listener to compute pension key
+            const dobInput = document.getElementById('date_of_birth');
+            if (dobInput) {
+                dobInput.addEventListener('change', computePensionFromDOB);
+                dobInput.addEventListener('input', computePensionFromDOB);
+            }
+
+            // Compute pension if DOB already present (edit mode)
+            setTimeout(computePensionFromDOB, 200);
         });
 
         function showMessage(message, type) {
@@ -1150,6 +1189,9 @@
                 window.editingId = id;
                 const submitBtn = document.getElementById('submit-btn');
                 if (submitBtn) submitBtn.innerHTML = 'Update';
+
+                // compute pension key if DOB present
+                setTimeout(computePensionFromDOB, 50);
 
             } catch (err) {
                 console.error('Load for edit failed:', err);
