@@ -495,7 +495,6 @@
                 renderRecentActivity(staff.slice(0, 5));
 
                 // Compute employees retiring within next 5 years
-                const now = new Date();
                 const cutoff = new Date(now.getFullYear() + 5, now.getMonth(), now.getDate());
 
                 const retiringList = staff.map(s => {
