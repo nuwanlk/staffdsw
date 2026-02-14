@@ -448,6 +448,18 @@
             <p class="subtitle">Advanced search & filtering</p>
         </header>
 
+        <div id="auth-ui" style="position: absolute; top: 1.5rem; right: 2rem; z-index: 2;">
+            <div id="auth-logged-out" style="display:none;">
+                <input id="auth-email" type="email" placeholder="email" style="padding:6px;margin-right:6px;" />
+                <input id="auth-password" type="password" placeholder="password" style="padding:6px;margin-right:6px;" />
+                <button id="auth-signin" class="nav-btn" style="padding:6px 10px;">Sign in</button>
+            </div>
+            <div id="auth-logged-in" style="display:none; align-items:center; gap:8px;">
+                <span id="auth-user" style="font-family: 'Space Mono', monospace; color:var(--text-dim); margin-right:8px;"></span>
+                <button id="auth-signout" class="nav-btn" style="padding:6px 10px;">Sign out</button>
+            </div>
+        </div>
+
         <nav>
             <a href="index.html" class="nav-btn">Dashboard</a>
             <a href="insert.html" class="nav-btn">Add Staff</a>
@@ -517,6 +529,61 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- Auth UI & helpers ---
+        const authEmailEl = document.getElementById('auth-email');
+        const authPasswordEl = document.getElementById('auth-password');
+        const authSigninBtn = document.getElementById('auth-signin');
+        const authSignoutBtn = document.getElementById('auth-signout');
+        const authLoggedOut = document.getElementById('auth-logged-out');
+        const authLoggedIn = document.getElementById('auth-logged-in');
+        const authUserSpan = document.getElementById('auth-user');
+
+        async function updateAuthUI(event, session) {
+            // session can be from onAuthStateChange or getSession
+            const s = session || (await supabase.auth.getSession()).data.session;
+            if (s && s.user) {
+                authLoggedOut.style.display = 'none';
+                authLoggedIn.style.display = 'flex';
+                authUserSpan.textContent = s.user.email || s.user.id;
+            } else {
+                authLoggedOut.style.display = 'block';
+                authLoggedIn.style.display = 'none';
+                authUserSpan.textContent = '';
+            }
+        }
+
+        authSigninBtn.addEventListener('click', async () => {
+            const email = authEmailEl.value.trim();
+            const password = authPasswordEl.value;
+            if (!email || !password) return alert('Enter email and password');
+            authSigninBtn.disabled = true;
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                await updateAuthUI(null, data.session);
+                // After sign-in, perform search
+                await searchStaff();
+            } catch (err) {
+                console.error('Signin error', err);
+                alert('Sign-in failed: ' + (err.message || err));
+            } finally {
+                authSigninBtn.disabled = false;
+            }
+        });
+
+        authSignoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            await updateAuthUI();
+            // Clear results when signed out
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('results-count').innerHTML = '<strong>0</strong> results found';
+        });
+
+        // Listen for auth changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            updateAuthUI(event, session);
+        });
 
         let currentResults = [];
 
@@ -931,9 +998,13 @@
         window.exportResults = exportResults;
         window.toggleExpand = toggleExpand;
 
-        // Load all staff on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            searchStaff();
+        // Load auth UI and only search if authenticated
+        document.addEventListener('DOMContentLoaded', async () => {
+            await updateAuthUI();
+            const session = (await supabase.auth.getSession()).data.session;
+            if (session && session.user) {
+                searchStaff();
+            }
         });
     </script>
 </body>
