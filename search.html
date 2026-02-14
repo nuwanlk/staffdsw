@@ -65,6 +65,10 @@
             animation: slideDown 0.8s ease-out;
         }
 
+        /* Center titles and nav buttons */
+        header { text-align: center; }
+        nav { justify-content: center; }
+
         @keyframes slideDown {
             from { transform: translateY(-30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -201,6 +205,9 @@
             gap: 1rem;
         }
 
+        /* Center the search action buttons */
+        .search-buttons { justify-content: center; }
+
         .search-btn,
         .clear-btn,
         .export-btn {
@@ -254,6 +261,9 @@
             align-items: center;
             margin-bottom: 1.5rem;
         }
+
+        /* Center results header on narrower layouts */
+        .results-header.center { justify-content: center; flex-direction: column; gap: 0.5rem; }
 
         .results-count {
             font-family: 'Space Mono', monospace;
@@ -366,6 +376,9 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
+        /* Center expand/edit/delete buttons inside cards */
+        .expand-btn { display: inline-block; margin-left: auto; margin-right: auto; }
 
         .expand-btn:hover {
             border-color: var(--accent);
