@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Staff Member - Staff Management System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <!-- Supabase will be imported as an ES module in the page script -->
     <style>
         :root {
@@ -48,8 +51,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         .container {
@@ -66,12 +76,24 @@
         }
 
         /* Center titles and nav buttons */
-        header { text-align: center; }
-        nav { justify-content: center; }
+        header {
+            text-align: center;
+        }
+
+        nav {
+            justify-content: center;
+        }
 
         @keyframes slideDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         h1 {
@@ -100,8 +122,15 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .nav-btn {
@@ -155,8 +184,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .section-title {
@@ -318,7 +354,9 @@
         }
 
         /* Center form action buttons */
-        .button-group { justify-content: center; }
+        .button-group {
+            justify-content: center;
+        }
 
         .submit-btn,
         .reset-btn {
@@ -371,8 +409,15 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .message.success {
@@ -398,8 +443,11 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
+
         .field-error {
             color: var(--accent-light);
             font-family: 'Space Mono', monospace;
@@ -407,6 +455,7 @@
             margin-top: 0.35rem;
             display: block;
         }
+
         /* Autocomplete suggestions for designation input */
         .suggestions-list {
             position: absolute;
@@ -417,7 +466,7 @@
             max-height: 200px;
             overflow: auto;
             z-index: 50;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
         }
 
         .suggestion-item {
@@ -427,25 +476,74 @@
             font-family: 'Crimson Pro', serif;
         }
 
-        .suggestion-item:hover { background: rgba(233,69,96,0.06); }
+        .suggestion-item:hover {
+            background: rgba(233, 69, 96, 0.06);
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 800px) {
-            .container { padding: 1rem; }
-            h1 { font-size: 2.2rem; }
-            .subtitle { font-size: 1rem; }
-            nav { flex-direction: column; gap: 0.5rem; }
-            .nav-btn { width: 100%; padding: 0.8rem 1rem; }
-            .form-grid { grid-template-columns: 1fr; }
-            .children-container, #qualifications-list { width: 100%; }
-            .child-entry, .qualification-entry { padding: 1rem; }
-            .button-group { flex-direction: column; }
-            .submit-btn, .reset-btn { width: 100%; }
-            .add-child-btn { width: 100%; }
-            label { font-size: 0.85rem; }
-            input, textarea, select { font-size: 1rem; }
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .nav-btn {
+                width: 100%;
+                padding: 0.8rem 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .children-container,
+            #qualifications-list {
+                width: 100%;
+            }
+
+            .child-entry,
+            .qualification-entry {
+                padding: 1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .submit-btn,
+            .reset-btn {
+                width: 100%;
+            }
+
+            .add-child-btn {
+                width: 100%;
+            }
+
+            label {
+                font-size: 0.85rem;
+            }
+
+            input,
+            textarea,
+            select {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -470,10 +568,7 @@
                         <label for="name_with_initials">Name with Initials *</label>
                         <input type="text" id="name_with_initials" name="name_with_initials" required>
                     </div>
-                    <div class="form-group">
-                        <label for="date_of_birth">Date of Birth</label>
-                        <input type="date" id="date_of_birth" name="date_of_birth">
-                    </div>
+
                     <div class="form-group">
                         <label for="name_full_sinhala">Full Name (Sinhala)</label>
                         <input type="text" id="name_full_sinhala" name="name_full_sinhala">
@@ -481,6 +576,10 @@
                     <div class="form-group">
                         <label for="name_full_english">Full Name (English)</label>
                         <input type="text" id="name_full_english" name="name_full_english">
+                    </div>
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth">
                     </div>
                     <div class="form-group">
                         <label for="nic_number">NIC Number *</label>
@@ -548,7 +647,8 @@
                     </div>
                     <div class="form-group">
                         <label for="previous_appointment_designation">Previous Designation</label>
-                        <input type="text" id="previous_appointment_designation" name="previous_appointment_designation">
+                        <input type="text" id="previous_appointment_designation"
+                            name="previous_appointment_designation">
                     </div>
                     <div class="form-group">
                         <label for="previous_appointment_date">Previous Appointment Date</label>
@@ -556,13 +656,15 @@
                     </div>
                     <div class="form-group">
                         <label for="transferred_to_current_institute_date">Transfer Date to Current Institute</label>
-                        <input type="date" id="transferred_to_current_institute_date" name="transferred_to_current_institute_date">
+                        <input type="date" id="transferred_to_current_institute_date"
+                            name="transferred_to_current_institute_date">
                     </div>
                     <div class="form-group">
                         <label>Is Appointment Permanent?</label>
                         <div class="checkbox-group">
                             <input type="checkbox" id="is_appointment_permanent" name="is_appointment_permanent">
-                            <label for="is_appointment_permanent" style="margin-bottom: 0; text-transform: none;">Yes</label>
+                            <label for="is_appointment_permanent"
+                                style="margin-bottom: 0; text-transform: none;">Yes</label>
                         </div>
                     </div>
                     <div class="form-group">
@@ -577,7 +679,8 @@
                     <div class="form-group full-width">
                         <label>Education Qualifications</label>
                         <div id="qualifications-list"></div>
-                        <button type="button" id="add-qualification-btn" class="add-child-btn">+ Add Qualification</button>
+                        <button type="button" id="add-qualification-btn" class="add-child-btn">+ Add
+                            Qualification</button>
                     </div>
                 </div>
 
@@ -672,7 +775,9 @@
                     <div class="form-group">
                         <label for="pension_date">Pension Date</label>
                         <input type="date" id="pension_date" name="pension_date">
-                        <div id="computed-pension-key" style="margin-top:6px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.9rem;"></div>
+                        <div id="computed-pension-key"
+                            style="margin-top:6px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.9rem;">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="resignation_date">Resignation Date</label>
@@ -880,7 +985,7 @@
             keyEl.textContent = `Pension date (auto): ${display}`;
             // If pension_date not set, set placeholder to computed value
             if (pensionInput && !pensionInput.value) {
-                pensionInput.placeholder = pension.toISOString().slice(0,10);
+                pensionInput.placeholder = pension.toISOString().slice(0, 10);
             }
         }
 
@@ -897,7 +1002,7 @@
                     .limit(2000);
                 if (error) throw error;
                 const unique = Array.from(new Set((data || []).map(d => (d.designation || '').trim()).filter(Boolean)));
-                designationsCache = unique.sort((a,b) => a.localeCompare(b));
+                designationsCache = unique.sort((a, b) => a.localeCompare(b));
             } catch (err) {
                 console.warn('Failed to load designations:', err);
             }
@@ -997,12 +1102,12 @@
         function getChildren() {
             const children = [];
             const childEntries = document.querySelectorAll('.child-entry');
-            
+
             childEntries.forEach(entry => {
                 const name = entry.querySelector('.child-name').value;
                 const dob = entry.querySelector('.child-dob').value;
                 const gender = entry.querySelector('.child-gender').value;
-                
+
                 if (name || dob || gender) {
                     children.push({
                         name: name,
@@ -1011,7 +1116,7 @@
                     });
                 }
             });
-            
+
             return children.length > 0 ? children : null;
         }
         // --- Form validation helpers ---
@@ -1241,7 +1346,7 @@
                                 // Try to parse ISO date
                                 const d = new Date(data[key]);
                                 if (!isNaN(d)) {
-                                    const iso = d.toISOString().slice(0,10);
+                                    const iso = d.toISOString().slice(0, 10);
                                     el.value = iso;
                                 } else {
                                     el.value = data[key];
@@ -1260,7 +1365,7 @@
                         const alt = data.date_of_birth || data.dob || data.birthday || data.birth_date || data['date-of-birth'];
                         if (alt) {
                             const d = new Date(alt);
-                            if (!isNaN(d)) dobEl.value = d.toISOString().slice(0,10);
+                            if (!isNaN(d)) dobEl.value = d.toISOString().slice(0, 10);
                             else dobEl.value = alt;
                         }
                     }
@@ -1281,7 +1386,7 @@
                         if (dobEl) {
                             if (child.date_of_birth) {
                                 const d = new Date(child.date_of_birth);
-                                if (!isNaN(d)) dobEl.value = d.toISOString().slice(0,10);
+                                if (!isNaN(d)) dobEl.value = d.toISOString().slice(0, 10);
                                 else dobEl.value = child.date_of_birth;
                             }
                         }
@@ -1318,8 +1423,8 @@
                         const startEl = le.querySelector('.leave-start');
                         const endEl = le.querySelector('.leave-end');
                         if (typeEl) typeEl.value = l.type || l.leave_type || '';
-                        if (startEl && l.start_date) startEl.value = (new Date(l.start_date)).toISOString().slice(0,10);
-                        if (endEl && l.end_date) endEl.value = (new Date(l.end_date)).toISOString().slice(0,10);
+                        if (startEl && l.start_date) startEl.value = (new Date(l.start_date)).toISOString().slice(0, 10);
+                        if (endEl && l.end_date) endEl.value = (new Date(l.end_date)).toISOString().slice(0, 10);
                     });
                 }
 
@@ -1367,4 +1472,5 @@
         });
     </script>
 </body>
+
 </html>
