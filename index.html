@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Management System - Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <!-- Supabase will be imported as an ES module in the page script -->
     <style>
         :root {
@@ -17,6 +20,18 @@
             --bg: #0f0f1e;
             --card-bg: #1a1a2e;
             --border: #2a2a3e;
+        }
+
+        [data-theme="light"] {
+            --primary: #ffffff;
+            --secondary: #f0f0f0;
+            --accent: #e94560;
+            --accent-light: #d63d56;
+            --text: #1a1a2e;
+            --text-dim: #555555;
+            --bg: #f4f4f9;
+            --card-bg: #ffffff;
+            --border: #dbe2e8;
         }
 
         * {
@@ -32,6 +47,7 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body::before {
@@ -47,8 +63,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         .container {
@@ -65,12 +88,24 @@
         }
 
         /* Center titles and nav buttons */
-        header { text-align: center; }
-        nav { justify-content: center; }
+        header {
+            text-align: center;
+        }
+
+        nav {
+            justify-content: center;
+        }
 
         @keyframes slideDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         h1 {
@@ -99,8 +134,15 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .nav-btn {
@@ -144,6 +186,15 @@
         .nav-btn.active {
             background: var(--accent);
             border-color: var(--accent);
+            color: #fff;
+        }
+
+        #theme-toggle {
+            padding: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
         .stats-grid {
@@ -160,16 +211,35 @@
             position: relative;
             overflow: hidden;
             animation: fadeIn 0.8s ease-out both;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
-        .stat-card:nth-child(1) { animation-delay: 0.3s; }
-        .stat-card:nth-child(2) { animation-delay: 0.4s; }
-        .stat-card:nth-child(3) { animation-delay: 0.5s; }
-        .stat-card:nth-child(4) { animation-delay: 0.6s; }
+        .stat-card:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.5s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.6s;
+        }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .stat-card::before {
@@ -182,12 +252,24 @@
             background: var(--accent);
         }
 
-        .stat-card.clickable { cursor: pointer; }
-        .stat-card.clickable:hover { border-color: var(--accent); }
+        .stat-card.clickable {
+            cursor: pointer;
+        }
+
+        .stat-card.clickable:hover {
+            border-color: var(--accent);
+        }
 
         /* popup list inside stat card */
-        .popup-item { padding: 0.4rem 0; border-bottom: 1px dashed var(--border); font-size: 0.9rem; }
-        .popup-item:last-child { border-bottom: none; }
+        .popup-item {
+            padding: 0.4rem 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 0.9rem;
+        }
+
+        .popup-item:last-child {
+            border-bottom: none;
+        }
 
         .stat-label {
             font-family: 'Space Mono', monospace;
@@ -256,14 +338,40 @@
 
         /* Mobile responsiveness */
         @media (max-width: 800px) {
-            .container { padding: 1rem; }
-            h1 { font-size: 2.2rem; }
-            .subtitle { font-size: 1rem; }
-            nav { flex-direction: column; gap: 0.5rem; }
-            .nav-btn { width: 100%; padding: 0.8rem 1rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .stat-value { font-size: 2.2rem; }
-            .stat-card, .chart-section { padding: 1rem; }
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .nav-btn {
+                width: 100%;
+                padding: 0.8rem 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2.2rem;
+            }
+
+            .stat-card,
+            .chart-section {
+                padding: 1rem;
+            }
         }
 
         .chart-bar-fill {
@@ -352,6 +460,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -364,6 +473,9 @@
             <a href="index.html" class="nav-btn active">Dashboard</a>
             <a href="insert.html" class="nav-btn">Add Staff</a>
             <a href="search.html" class="nav-btn">Search</a>
+            <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
+                <span class="icon">☀️</span>
+            </button>
         </nav>
 
         <div id="status-container"></div>
@@ -389,14 +501,18 @@
                 <div class="stat-label">Increment (30d)</div>
                 <div class="stat-value" id="increment-count">---</div>
                 <div class="stat-description">Increments within 30 days</div>
-                <div id="increment-popup" style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;"></div>
+                <div id="increment-popup"
+                    style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;">
+                </div>
             </div>
-            
+
             <div class="stat-card clickable" id="retire-card">
                 <div class="stat-label">Retiring (5y)</div>
                 <div class="stat-value" id="retire-count">---</div>
                 <div class="stat-description">Employees retiring within 5 years</div>
-                <div id="retire-popup" style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;"></div>
+                <div id="retire-popup"
+                    style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;">
+                </div>
             </div>
         </div>
 
@@ -430,6 +546,30 @@
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = themeToggleBtn.querySelector('.icon');
+        const htmlElement = document.documentElement;
+
+        // Check local storage for theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            htmlElement.setAttribute('data-theme', 'light');
+            themeIcon.textContent = '🌙';
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.getAttribute('data-theme') === 'light') {
+                htmlElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                htmlElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeIcon.textContent = '🌙';
+            }
+        });
+
         function showError(message) {
             const errorContainer = document.getElementById('error-container');
             errorContainer.innerHTML = `<div class="error">${message}</div>`;
@@ -453,7 +593,7 @@
         async function loadDashboard() {
             // Check connection first
             await checkSupabaseConnection();
-            
+
             try {
                 // Fetch all staff data
                 const { data: staff, error } = await supabase
@@ -467,7 +607,7 @@
                 const totalStaff = staff.length;
                 const maleCount = staff.filter(s => s.gender?.toLowerCase() === 'male').length;
                 const femaleCount = staff.filter(s => s.gender?.toLowerCase() === 'female').length;
-                
+
                 // Current time reference
                 const now = new Date();
 
@@ -517,8 +657,8 @@
                         }
                     }
                     return { record: s, pensionDate };
-                                }).filter(x => x.pensionDate && x.pensionDate >= startOfYear && x.pensionDate <= cutoff)
-                  .sort((a, b) => a.pensionDate - b.pensionDate);
+                }).filter(x => x.pensionDate && x.pensionDate >= startOfYear && x.pensionDate <= cutoff)
+                    .sort((a, b) => a.pensionDate - b.pensionDate);
 
                 const retiringCount = retiringList.length;
                 console.debug('Retiring count computed:', retiringCount);
@@ -529,32 +669,32 @@
                 // expose list for popup and click handler
                 window.retiringListGlobal = retiringList;
 
-                                // --- Increments within next 30 days (anniversary of first_appointment_date) ---
-                                const incrementCutoff = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
-                                const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                // --- Increments within next 30 days (anniversary of first_appointment_date) ---
+                const incrementCutoff = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+                const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-                                const incrementList = staff.map(s => {
-                                        const fa = s.first_appointment_date || s.first_appointment || s.first_appointment_date_string;
-                                        if (!fa) return null;
-                                        const fd = new Date(fa);
-                                        if (isNaN(fd)) return null;
-                                        // next anniversary date in this calendar year
-                                        let nextAnniv = new Date(now.getFullYear(), fd.getMonth(), fd.getDate());
-                                        // If anniversary already passed this year, use next year
-                                        if (nextAnniv < startOfToday) {
-                                                nextAnniv.setFullYear(now.getFullYear() + 1);
-                                        }
-                                        return { record: s, nextAnniv };
-                                }).filter(x => x && x.nextAnniv >= startOfToday && x.nextAnniv <= incrementCutoff)
-                                    .sort((a, b) => a.nextAnniv - b.nextAnniv);
+                const incrementList = staff.map(s => {
+                    const fa = s.first_appointment_date || s.first_appointment || s.first_appointment_date_string;
+                    if (!fa) return null;
+                    const fd = new Date(fa);
+                    if (isNaN(fd)) return null;
+                    // next anniversary date in this calendar year
+                    let nextAnniv = new Date(now.getFullYear(), fd.getMonth(), fd.getDate());
+                    // If anniversary already passed this year, use next year
+                    if (nextAnniv < startOfToday) {
+                        nextAnniv.setFullYear(now.getFullYear() + 1);
+                    }
+                    return { record: s, nextAnniv };
+                }).filter(x => x && x.nextAnniv >= startOfToday && x.nextAnniv <= incrementCutoff)
+                    .sort((a, b) => a.nextAnniv - b.nextAnniv);
 
-                                const incrementCount = incrementList.length;
-                                console.debug('Increment count computed:', incrementCount);
-                                const incEl = document.getElementById('increment-count');
-                                if (incEl) incEl.textContent = String(incrementCount);
-                                animateValue('increment-count', 0, incrementCount, 1000);
-                                window.incrementListGlobal = incrementList;
-                                renderIncrementSoon(incrementList.slice(0, 20));
+                const incrementCount = incrementList.length;
+                console.debug('Increment count computed:', incrementCount);
+                const incEl = document.getElementById('increment-count');
+                if (incEl) incEl.textContent = String(incrementCount);
+                animateValue('increment-count', 0, incrementCount, 1000);
+                window.incrementListGlobal = incrementList;
+                renderIncrementSoon(incrementList.slice(0, 20));
                 renderRetiringSoon(retiringList.slice(0, 20));
 
             } catch (error) {
@@ -612,7 +752,7 @@
 
         function renderRecentActivity(staff) {
             const container = document.getElementById('recent-activity');
-            
+
             if (staff.length === 0) {
                 container.innerHTML = '<div class="activity-item"><div class="activity-text">No recent additions</div></div>';
                 return;
@@ -720,4 +860,5 @@
         });
     </script>
 </body>
+
 </html>

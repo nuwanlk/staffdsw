@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Staff - Staff Management System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <!-- Supabase will be imported as an ES module in the page script -->
     <style>
         :root {
@@ -20,6 +23,19 @@
             --success: #4ecca3;
         }
 
+        [data-theme="light"] {
+            --primary: #ffffff;
+            --secondary: #f0f0f0;
+            --accent: #e94560;
+            --accent-light: #d63d56;
+            --text: #1a1a2e;
+            --text-dim: #555555;
+            --bg: #f4f4f9;
+            --card-bg: #ffffff;
+            --border: #dbe2e8;
+            --success: #2e7d32;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -33,6 +49,7 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body::before {
@@ -48,8 +65,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         .container {
@@ -66,12 +90,24 @@
         }
 
         /* Center titles and nav buttons */
-        header { text-align: center; }
-        nav { justify-content: center; }
+        header {
+            text-align: center;
+        }
+
+        nav {
+            justify-content: center;
+        }
 
         @keyframes slideDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         h1 {
@@ -100,8 +136,15 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .nav-btn {
@@ -145,6 +188,15 @@
         .nav-btn.active {
             background: var(--accent);
             border-color: var(--accent);
+            color: #fff;
+        }
+
+        #theme-toggle {
+            padding: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
         .search-container {
@@ -153,11 +205,19 @@
             padding: 2rem;
             margin-bottom: 2rem;
             animation: fadeIn 0.8s ease-out 0.3s both;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .search-grid {
@@ -206,7 +266,9 @@
         }
 
         /* Center the search action buttons */
-        .search-buttons { justify-content: center; }
+        .search-buttons {
+            justify-content: center;
+        }
 
         .search-btn,
         .clear-btn,
@@ -263,7 +325,11 @@
         }
 
         /* Center results header on narrower layouts */
-        .results-header.center { justify-content: center; flex-direction: column; gap: 0.5rem; }
+        .results-header.center {
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
         .results-count {
             font-family: 'Space Mono', monospace;
@@ -378,7 +444,11 @@
         }
 
         /* Center expand/edit/delete buttons inside cards */
-        .expand-btn { display: inline-block; margin-left: auto; margin-right: auto; }
+        .expand-btn {
+            display: inline-block;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
         .expand-btn:hover {
             border-color: var(--accent);
@@ -438,7 +508,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .children-list {
@@ -452,26 +524,81 @@
             border-left: 2px solid var(--accent);
             font-size: 0.9rem;
         }
+
         /* Mobile responsiveness */
         @media (max-width: 800px) {
-            .container { padding: 1rem; }
-            h1 { font-size: 2.2rem; }
-            .subtitle { font-size: 1rem; }
-            nav { flex-direction: column; gap: 0.5rem; }
-            .nav-btn { width: 100%; padding: 0.8rem 1rem; }
-            .search-grid { grid-template-columns: 1fr; }
-            .staff-details { grid-template-columns: 1fr; }
-            .staff-card { padding: 1rem; }
-            .staff-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-            .staff-id { text-align: left; }
-            .search-buttons { flex-direction: column; }
-            .search-btn, .clear-btn, .export-btn { width: 100%; }
-            .expand-btn { width: 100%; margin-top: 0.75rem; }
-            .children-list .child-item { font-size: 0.95rem; }
-            .results-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .nav-btn {
+                width: 100%;
+                padding: 0.8rem 1rem;
+            }
+
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .staff-details {
+                grid-template-columns: 1fr;
+            }
+
+            .staff-card {
+                padding: 1rem;
+            }
+
+            .staff-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .staff-id {
+                text-align: left;
+            }
+
+            .search-buttons {
+                flex-direction: column;
+            }
+
+            .search-btn,
+            .clear-btn,
+            .export-btn {
+                width: 100%;
+            }
+
+            .expand-btn {
+                width: 100%;
+                margin-top: 0.75rem;
+            }
+
+            .children-list .child-item {
+                font-size: 0.95rem;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -483,6 +610,9 @@
             <a href="index.html" class="nav-btn">Dashboard</a>
             <a href="insert.html" class="nav-btn">Add Staff</a>
             <a href="search.html" class="nav-btn active">Search</a>
+            <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
+                <span class="icon">☀️</span>
+            </button>
         </nav>
 
         <div class="search-container">
@@ -552,6 +682,30 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = themeToggleBtn.querySelector('.icon');
+        const htmlElement = document.documentElement;
+
+        // Check local storage for theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            htmlElement.setAttribute('data-theme', 'light');
+            themeIcon.textContent = '🌙';
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.getAttribute('data-theme') === 'light') {
+                htmlElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                htmlElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeIcon.textContent = '🌙';
+            }
+        });
 
         let currentResults = [];
 
@@ -641,7 +795,7 @@
                 return;
             }
 
-                resultsDiv.innerHTML = data.map((staff, index) => `
+            resultsDiv.innerHTML = data.map((staff, index) => `
                 <div class="staff-card">
                     <div class="staff-header">
                         <div>
@@ -925,48 +1079,48 @@
                 </div>
             `).join('');
 
-                // Attach event listeners for expand/edit/delete after rendering
-                // Expand
-                resultsDiv.querySelectorAll('.expand-btn[data-index]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const idx = parseInt(btn.getAttribute('data-index'), 10);
-                        toggleExpand(idx);
-                    });
+            // Attach event listeners for expand/edit/delete after rendering
+            // Expand
+            resultsDiv.querySelectorAll('.expand-btn[data-index]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(btn.getAttribute('data-index'), 10);
+                    toggleExpand(idx);
                 });
+            });
 
-                // Edit
-                resultsDiv.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = btn.getAttribute('data-id');
-                        if (!id) return;
-                        // Navigate to insert.html with id query param for editing
-                        window.location.href = `insert.html?id=${encodeURIComponent(id)}`;
-                    });
+            // Edit
+            resultsDiv.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = btn.getAttribute('data-id');
+                    if (!id) return;
+                    // Navigate to insert.html with id query param for editing
+                    window.location.href = `insert.html?id=${encodeURIComponent(id)}`;
                 });
+            });
 
-                // Delete
-                resultsDiv.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const id = btn.getAttribute('data-id');
-                        if (!id) return;
-                        const ok = confirm('Are you sure you want to delete this staff member? This action cannot be undone.');
-                        if (!ok) return;
+            // Delete
+            resultsDiv.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.getAttribute('data-id');
+                    if (!id) return;
+                    const ok = confirm('Are you sure you want to delete this staff member? This action cannot be undone.');
+                    if (!ok) return;
 
-                        try {
-                            btn.disabled = true;
-                            const { error } = await supabase.from('staff_members').delete().eq('id', id);
-                            if (error) throw error;
-                            // Remove from currentResults and re-render
-                            currentResults = currentResults.filter(s => s.id !== id);
-                            displayResults(currentResults);
-                        } catch (err) {
-                            console.error('Delete error:', err);
-                            alert('Error deleting staff: ' + (err.message || err));
-                        } finally {
-                            btn.disabled = false;
-                        }
-                    });
+                    try {
+                        btn.disabled = true;
+                        const { error } = await supabase.from('staff_members').delete().eq('id', id);
+                        if (error) throw error;
+                        // Remove from currentResults and re-render
+                        currentResults = currentResults.filter(s => s.id !== id);
+                        displayResults(currentResults);
+                    } catch (err) {
+                        console.error('Delete error:', err);
+                        alert('Error deleting staff: ' + (err.message || err));
+                    } finally {
+                        btn.disabled = false;
+                    }
                 });
+            });
         }
 
         function toggleExpand(index) {
@@ -1047,4 +1201,5 @@
         });
     </script>
 </body>
+
 </html>
