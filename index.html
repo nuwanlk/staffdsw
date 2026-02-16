@@ -475,9 +475,9 @@
         </header>
 
         <nav>
-            <a href="index.html" class="nav-btn active">Dashboard</a>
-            <a href="insert.html" class="nav-btn">Add Staff</a>
-            <a href="search.html" class="nav-btn">Search</a>
+            <a href="index.html" class="nav-btn active" data-i18n="dashboard">Dashboard</a>
+            <a href="insert.html" class="nav-btn" data-i18n="add_staff">Add Staff</a>
+            <a href="search.html" class="nav-btn" data-i18n="search">Search</a>
             <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
                 <span class="icon">☀️</span>
             </button>
@@ -491,33 +491,33 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Staff</div>
+                <div class="stat-label" data-i18n="total_staff">Total Staff</div>
                 <div class="stat-value" id="total-staff">---</div>
-                <div class="stat-description">Active employees</div>
+                <div class="stat-description" data-i18n="active_employees">Active employees</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Male</div>
+                <div class="stat-label" data-i18n="male">Male</div>
                 <div class="stat-value" id="male-count">---</div>
-                <div class="stat-description">Male employees</div>
+                <div class="stat-description" data-i18n="male_employees">Male employees</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Female</div>
+                <div class="stat-label" data-i18n="female">Female</div>
                 <div class="stat-value" id="female-count">---</div>
-                <div class="stat-description">Female employees</div>
+                <div class="stat-description" data-i18n="female_employees">Female employees</div>
             </div>
             <div class="stat-card clickable" id="increment-card">
-                <div class="stat-label">Increment (30d)</div>
+                <div class="stat-label" data-i18n="increment_30d">Increment (30d)</div>
                 <div class="stat-value" id="increment-count">---</div>
-                <div class="stat-description">Increments within 30 days</div>
+                <div class="stat-description" data-i18n="increment_desc">Increments within 30 days</div>
                 <div id="increment-popup"
                     style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;">
                 </div>
             </div>
 
             <div class="stat-card clickable" id="retire-card">
-                <div class="stat-label">Retiring (5y)</div>
+                <div class="stat-label" data-i18n="retiring_5y">Retiring (5y)</div>
                 <div class="stat-value" id="retire-count">---</div>
-                <div class="stat-description">Employees retiring within 5 years</div>
+                <div class="stat-description" data-i18n="retiring_desc">Employees retiring within 5 years</div>
                 <div id="retire-popup"
                     style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;">
                 </div>
