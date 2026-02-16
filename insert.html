@@ -199,6 +199,11 @@
             font-size: 1.2rem;
         }
 
+        .lang-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
         .form-container {
             background: var(--card-bg);
             border: 2px solid var(--border);
@@ -573,16 +578,19 @@
 <body>
     <div class="container">
         <header>
-            <h1>ADD STAFF MEMBER</h1>
-            <p class="subtitle">Complete staff registration form</p>
+            <h1 data-i18n="add_staff_title">ADD STAFF MEMBER</h1>
+            <p class="subtitle" data-i18n="add_staff_desc">Complete staff registration form</p>
         </header>
 
         <nav>
-            <a href="index.html" class="nav-btn">Dashboard</a>
-            <a href="insert.html" class="nav-btn active">Add Staff</a>
-            <a href="search.html" class="nav-btn">Search</a>
+            <a href="index.html" class="nav-btn" data-i18n="dashboard">Dashboard</a>
+            <a href="insert.html" class="nav-btn active" data-i18n="add_staff">Add Staff</a>
+            <a href="search.html" class="nav-btn" data-i18n="search">Search</a>
             <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
                 <span class="icon">☀️</span>
+            </button>
+            <button id="lang-toggle" class="nav-btn" aria-label="Toggle Language">
+                <span class="lang-text">SI</span>
             </button>
         </nav>
 
@@ -591,42 +599,42 @@
         <div class="form-container">
             <form id="staff-form">
                 <!-- Personal Information -->
-                <div class="section-title">Personal Information</div>
+                <div class="section-title" data-i18n="personal_info">Personal Information</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="name_with_initials">Name with Initials *</label>
+                        <label for="name_with_initials" data-i18n="name_with_initials">Name with Initials *</label>
                         <input type="text" id="name_with_initials" name="name_with_initials" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="name_full_sinhala">Full Name (Sinhala)</label>
+                        <label for="name_full_sinhala" data-i18n="full_name_sinhala">Full Name (Sinhala)</label>
                         <input type="text" id="name_full_sinhala" name="name_full_sinhala">
                     </div>
                     <div class="form-group">
-                        <label for="name_full_english">Full Name (English)</label>
+                        <label for="name_full_english" data-i18n="full_name_english">Full Name (English)</label>
                         <input type="text" id="name_full_english" name="name_full_english">
                     </div>
                     <div class="form-group">
-                        <label for="date_of_birth">Date of Birth</label>
+                        <label for="date_of_birth" data-i18n="dob">Date of Birth</label>
                         <input type="date" id="date_of_birth" name="date_of_birth">
                     </div>
                     <div class="form-group">
-                        <label for="nic_number">NIC Number *</label>
+                        <label for="nic_number" data-i18n="nic">NIC Number *</label>
                         <input type="text" id="nic_number" name="nic_number" required>
                     </div>
                     <div class="form-group">
-                        <label for="gender">Gender</label>
+                        <label for="gender" data-i18n="gender">Gender</label>
                         <select id="gender" name="gender">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                            <option value="" data-i18n="select_gender">Select Gender</option>
+                            <option value="Male" data-i18n="male">Male</option>
+                            <option value="Female" data-i18n="female">Female</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="marital_status">Marital Status</label>
+                        <label for="marital_status" data-i18n="marital_status">Marital Status</label>
                         <select id="marital_status" name="marital_status">
-                            <option value="">Select Status</option>
+                            <option value="" data-i18n="select_status">Select Status</option>
                             <option value="Single">Single</option>
                             <option value="Married">Married</option>
                             <option value="Divorced">Divorced</option>
@@ -634,172 +642,184 @@
                         </select>
                     </div>
                     <div class="form-group full-width">
-                        <label for="permanent_address">Permanent Address</label>
+                        <label for="permanent_address" data-i18n="permanent_address">Permanent Address</label>
                         <textarea id="permanent_address" name="permanent_address"></textarea>
                     </div>
                 </div>
 
                 <!-- Contact Information -->
-                <div class="section-title">Contact Information</div>
+                <div class="section-title" data-i18n="contact_info">Contact Information</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="phone_no">Phone Number</label>
+                        <label for="phone_no" data-i18n="phone">Phone Number</label>
                         <input type="tel" id="phone_no" name="phone_no">
                     </div>
                     <div class="form-group">
-                        <label for="whatsapp_no">WhatsApp Number</label>
+                        <label for="whatsapp_no" data-i18n="whatsapp">WhatsApp Number</label>
                         <input type="tel" id="whatsapp_no" name="whatsapp_no">
                     </div>
                     <div class="form-group">
-                        <label for="email_address">Email Address</label>
+                        <label for="email_address" data-i18n="email">Email Address</label>
                         <input type="email" id="email_address" name="email_address">
                     </div>
                 </div>
 
                 <!-- Employment Information -->
-                <div class="section-title">Employment Information</div>
+                <div class="section-title" data-i18n="employment_info">Employment Information</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="designation">Designation</label>
+                        <label for="designation" data-i18n="designation">Designation</label>
                         <div style="position:relative;">
                             <input type="text" id="designation" name="designation" autocomplete="off">
                             <div id="designation-suggestions" class="suggestions-list" style="display:none;"></div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="grade">Grade</label>
+                        <label for="grade" data-i18n="grade">Grade</label>
                         <input type="text" id="grade" name="grade">
                     </div>
                     <div class="form-group">
-                        <label for="first_appointment_date">First Appointment Date</label>
+                        <label for="first_appointment_date" data-i18n="first_appointment_date">First Appointment
+                            Date</label>
                         <input type="date" id="first_appointment_date" name="first_appointment_date">
                     </div>
                     <div class="form-group">
-                        <label for="previous_appointment_designation">Previous Designation</label>
+                        <label for="previous_appointment_designation" data-i18n="previous_designation">Previous
+                            Designation</label>
                         <input type="text" id="previous_appointment_designation"
                             name="previous_appointment_designation">
                     </div>
                     <div class="form-group">
-                        <label for="previous_appointment_date">Previous Appointment Date</label>
+                        <label for="previous_appointment_date" data-i18n="previous_appointment_date">Previous
+                            Appointment Date</label>
                         <input type="date" id="previous_appointment_date" name="previous_appointment_date">
                     </div>
                     <div class="form-group">
-                        <label for="transferred_to_current_institute_date">Transfer Date to Current Institute</label>
+                        <label for="transferred_to_current_institute_date" data-i18n="transfer_date">Transfer Date to
+                            Current Institute</label>
                         <input type="date" id="transferred_to_current_institute_date"
                             name="transferred_to_current_institute_date">
                     </div>
                     <div class="form-group">
-                        <label>Is Appointment Permanent?</label>
+                        <label data-i18n="is_permanent">Is Appointment Permanent?</label>
                         <div class="checkbox-group">
                             <input type="checkbox" id="is_appointment_permanent" name="is_appointment_permanent">
-                            <label for="is_appointment_permanent"
-                                style="margin-bottom: 0; text-transform: none;">Yes</label>
+                            <label for="is_appointment_permanent" style="margin-bottom: 0; text-transform: none;"
+                                data-i18n="yes">Yes</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="permanent_date">Permanent Date</label>
+                        <label for="permanent_date" data-i18n="permanent_date">Permanent Date</label>
                         <input type="date" id="permanent_date" name="permanent_date">
                     </div>
                 </div>
 
                 <!-- Education & Qualifications -->
-                <div class="section-title">Education & Qualifications</div>
+                <div class="section-title" data-i18n="education_qualifications">Education & Qualifications</div>
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label>Education Qualifications</label>
+                        <label data-i18n="education_qualifications">Education Qualifications</label>
                         <div id="qualifications-list"></div>
-                        <button type="button" id="add-qualification-btn" class="add-child-btn">+ Add
+                        <button type="button" id="add-qualification-btn" class="add-child-btn"
+                            data-i18n="add_qualification">+ Add
                             Qualification</button>
                     </div>
                 </div>
 
                 <!-- Efficiency Bar Exams -->
-                <div class="section-title">Efficiency Bar Exams</div>
+                <div class="section-title" data-i18n="efficiency_bar_exams">Efficiency Bar Exams</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="efficiency_bar_exam_grade3_date">Grade 3 Exam Date</label>
+                        <label for="efficiency_bar_exam_grade3_date" data-i18n="grade_3_exam_date">Grade 3 Exam
+                            Date</label>
                         <input type="date" id="efficiency_bar_exam_grade3_date" name="efficiency_bar_exam_grade3_date">
                     </div>
                     <div class="form-group">
-                        <label for="efficiency_bar_exam_grade2_date">Grade 2 Exam Date</label>
+                        <label for="efficiency_bar_exam_grade2_date" data-i18n="grade_2_exam_date">Grade 2 Exam
+                            Date</label>
                         <input type="date" id="efficiency_bar_exam_grade2_date" name="efficiency_bar_exam_grade2_date">
                     </div>
                     <div class="form-group">
-                        <label for="efficiency_bar_exam_grade1_date">Grade 1 Exam Date</label>
+                        <label for="efficiency_bar_exam_grade1_date" data-i18n="grade_1_exam_date">Grade 1 Exam
+                            Date</label>
                         <input type="date" id="efficiency_bar_exam_grade1_date" name="efficiency_bar_exam_grade1_date">
                     </div>
                 </div>
 
                 <!-- Promotions -->
-                <div class="section-title">Promotions</div>
+                <div class="section-title" data-i18n="promotions">Promotions</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="promoted_to_grade2_date">Promoted to Grade 2</label>
+                        <label for="promoted_to_grade2_date" data-i18n="promoted_grade_2">Promoted to Grade 2</label>
                         <input type="date" id="promoted_to_grade2_date" name="promoted_to_grade2_date">
                     </div>
                     <div class="form-group">
-                        <label for="promoted_to_grade1_date">Promoted to Grade 1</label>
+                        <label for="promoted_to_grade1_date" data-i18n="promoted_grade_1">Promoted to Grade 1</label>
                         <input type="date" id="promoted_to_grade1_date" name="promoted_to_grade1_date">
                     </div>
                     <div class="form-group">
-                        <label for="promoted_to_special_grade_date">Promoted to Special Grade</label>
+                        <label for="promoted_to_special_grade_date" data-i18n="promoted_special">Promoted to Special
+                            Grade</label>
                         <input type="date" id="promoted_to_special_grade_date" name="promoted_to_special_grade_date">
                     </div>
                     <div class="form-group">
-                        <label for="promoted_to_supra_date">Promoted to Supra</label>
+                        <label for="promoted_to_supra_date" data-i18n="promoted_supra">Promoted to Supra</label>
                         <input type="date" id="promoted_to_supra_date" name="promoted_to_supra_date">
                     </div>
                 </div>
 
                 <!-- Leave Information -->
-                <div class="section-title">Leave Information</div>
+                <div class="section-title" data-i18n="leave_info">Leave Information</div>
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label>Leaves</label>
+                        <label data-i18n="leaves">Leaves</label>
                         <div id="leaves-list"></div>
-                        <button type="button" id="add-leave-btn" class="add-child-btn">+ Add Leave</button>
+                        <button type="button" id="add-leave-btn" class="add-child-btn" data-i18n="add_leave">+ Add
+                            Leave</button>
                     </div>
                 </div>
 
                 <!-- Spouse Information -->
-                <div class="section-title">Spouse Information</div>
+                <div class="section-title" data-i18n="spouse_info">Spouse Information</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="spouse_name">Spouse Name</label>
+                        <label for="spouse_name" data-i18n="spouse_name">Spouse Name</label>
                         <input type="text" id="spouse_name" name="spouse_name">
                     </div>
                     <div class="form-group">
-                        <label for="spouse_designation">Spouse Designation</label>
+                        <label for="spouse_designation" data-i18n="spouse_designation">Spouse Designation</label>
                         <input type="text" id="spouse_designation" name="spouse_designation">
                     </div>
                     <div class="form-group">
-                        <label for="spouse_workplace">Spouse Workplace</label>
+                        <label for="spouse_workplace" data-i18n="spouse_workplace">Spouse Workplace</label>
                         <input type="text" id="spouse_workplace" name="spouse_workplace">
                     </div>
                 </div>
 
                 <!-- Children Information -->
-                <div class="section-title">Children Information</div>
+                <div class="section-title" data-i18n="children_info">Children Information</div>
                 <div class="children-container">
                     <div id="children-list"></div>
-                    <button type="button" class="add-child-btn" onclick="addChild()">+ Add Child</button>
+                    <button type="button" class="add-child-btn" onclick="addChild()" data-i18n="add_child">+ Add
+                        Child</button>
                 </div>
 
                 <!-- Additional Information -->
-                <div class="section-title">Additional Information</div>
+                <div class="section-title" data-i18n="additional_info">Additional Information</div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="has_disability">Has Disability?</label>
+                        <label for="has_disability" data-i18n="has_disability">Has Disability?</label>
                         <select id="has_disability" name="has_disability">
-                            <option value="">Select</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
+                            <option value="" data-i18n="select">Select</option>
+                            <option value="Yes" data-i18n="yes">Yes</option>
+                            <option value="No" data-i18n="no">No</option>
                         </select>
                     </div>
                     <div class="form-group full-width" id="disabilities-container" style="display:none;">
-                        <label>Disabilities</label>
+                        <label data-i18n="disabilities">Disabilities</label>
                         <div id="disabilities-list"></div>
-                        <button type="button" id="add-disability-btn" class="add-child-btn">+ Add Disability</button>
+                        <button type="button" id="add-disability-btn" class="add-child-btn" data-i18n="add_disability">+
+                            Add Disability</button>
                     </div>
                     <div class="form-group">
                         <label for="pension_date">Pension Date</label>
@@ -823,8 +843,8 @@
                 </div>
 
                 <div class="button-group">
-                    <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
-                    <button type="reset" class="reset-btn">Reset Form</button>
+                    <button type="submit" class="submit-btn" id="submit-btn" data-i18n="submit">Submit</button>
+                    <button type="reset" class="reset-btn" data-i18n="reset">Reset Form</button>
                 </div>
             </form>
         </div>
@@ -1525,6 +1545,74 @@
                 }
             });
         });
+    </script>
+
+    <script type="module">
+        import { translations } from './translations.js';
+
+        // Language Toggle Logic
+        const langToggleBtn = document.getElementById('lang-toggle');
+        const langText = langToggleBtn.querySelector('.lang-text');
+
+        // Helper to get text node of an element (ignoring children like <input>)
+        // For buttons that might have mixed content, we might need a wrapper. 
+        // But for this app, buttons are mostly just text or text + icon.
+
+        let currentLang = localStorage.getItem('language') || 'en';
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+
+            // Update button text
+            langText.textContent = lang === 'en' ? 'SI' : 'EN';
+
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    // Handle inputs with placeholders
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        if (element.getAttribute('placeholder')) {
+                            element.placeholder = translations[lang][key];
+                        }
+                    } else if (element.tagName === 'OPTION') {
+                        element.textContent = translations[lang][key];
+                    } else {
+                        // For normal elements
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+
+            // Special handling for dynamic buttons if needed
+            const addQBtn = document.getElementById('add-qualification-btn');
+            if (addQBtn) addQBtn.textContent = translations[lang]['add_qualification'];
+
+            const addLBtn = document.getElementById('add-leave-btn');
+            if (addLBtn) addLBtn.textContent = translations[lang]['add_leave'];
+
+            // Update submit/reset buttons
+            const submitBtn = document.getElementById('submit-btn');
+            // Check if it says "Update" or "Submit" - this is dynamic. 
+            // If editing, we might want to keep "Update" or translate it.
+            // For now, let's just translate the base visual buttons if they aren't purely dynamic. 
+            // Actually submit button text changes logic ("Update" vs "Submit"). 
+            // I should handle that in the render logic or just check its current state.
+            // The existing code sets innerHTML = 'Update'.
+
+            // Let's just trigger a custom event and let the main script handle if needed, 
+            // or just update static things.
+        }
+
+        langToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newLang = currentLang === 'en' ? 'si' : 'en';
+            updateLanguage(newLang);
+        });
+
+        // Initialize Language
+        updateLanguage(currentLang);
     </script>
 </body>
 
