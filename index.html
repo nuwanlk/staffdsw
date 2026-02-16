@@ -214,11 +214,6 @@
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
-        .lang-text {
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
         .stat-card:nth-child(1) {
             animation-delay: 0.3s;
         }
@@ -469,9 +464,9 @@
 <body>
     <div class="container">
         <header>
-            <h1 data-i18n="app_title">STAFF MANAGEMENT</h1>
-            <h2 data-i18n="app_subtitle">Divisional Secretariat Weligama</h2>
-            <p class="subtitle" data-i18n="app_desc">Real-time dashboard & analytics</p>
+            <h1>STAFF MANAGEMENT</h1>
+            <h2>Divisional Secretariat Weligama</h2>
+            <p class="subtitle">Real-time dashboard & analytics</p>
         </header>
 
         <nav>
@@ -480,9 +475,6 @@
             <a href="search.html" class="nav-btn">Search</a>
             <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
                 <span class="icon">☀️</span>
-            </button>
-            <button id="lang-toggle" class="nav-btn" aria-label="Toggle Language">
-                <span class="lang-text">SI</span>
             </button>
         </nav>
 
@@ -525,83 +517,28 @@
         </div>
 
         <div class="chart-section">
-            <div class="chart-title" data-i18n="staff_by_designation">Staff by Designation</div>
+            <div class="chart-title">Staff by Designation</div>
             <div id="designation-chart"></div>
         </div>
-        <div id="designation-chart"></div>
-    </div>
 
-    <div class="chart-section">
-        <div class="chart-title" data-i18n="staff_by_grade">Staff by Grade</div>
-        <div id="grade-chart"></div>
-    </div>
-    <div id="grade-chart"></div>
-    </div>
+        <div class="chart-section">
+            <div class="chart-title">Staff by Grade</div>
+            <div id="grade-chart"></div>
+        </div>
 
-    <div class="recent-activity">
-        <div class="chart-title" data-i18n="recent_additions">Recent Additions</div>
-        <div id="recent-activity"></div>
-    </div>
-    <div id="recent-activity"></div>
-    </div>
+        <div class="recent-activity">
+            <div class="chart-title">Recent Additions</div>
+            <div id="recent-activity"></div>
+        </div>
 
-    <div class="chart-section">
-        <div class="chart-title" data-i18n="retiring_soon">Retiring Soon (next 5 years)</div>
-        <div id="retiring-soon"></div>
-    </div>
-    <div id="retiring-soon"></div>
-    </div>
+        <div class="chart-section">
+            <div class="chart-title">Retiring Soon (next 5 years)</div>
+            <div id="retiring-soon"></div>
+        </div>
     </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-        import { translations } from './translations.js';
-
-        // Language Toggle Logic
-        const langToggleBtn = document.getElementById('lang-toggle');
-        const langText = langToggleBtn.querySelector('.lang-text');
-
-        let currentLang = localStorage.getItem('language') || 'en';
-
-        function updateLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('language', lang);
-
-            // Update button text
-            langText.textContent = lang === 'en' ? 'SI' : 'EN';
-
-            // Update all elements with data-i18n attribute
-            document.querySelectorAll('[data-i18n]').forEach(element => {
-                const key = element.getAttribute('data-i18n');
-                if (translations[lang] && translations[lang][key]) {
-                    if (element.tagName === 'INPUT' && element.getAttribute('placeholder')) {
-                        element.placeholder = translations[lang][key];
-                    } else {
-                        element.textContent = translations[lang][key];
-                    }
-                }
-            });
-
-            // Trigger custom event for other scripts to know language changed
-            document.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
-
-            // Re-render things that might need translation updates (like charts/status text)
-            // But for now, mostly static text is handled. Dynamic text needs specific handling.
-            updateDynamicContent(lang);
-        }
-
-        function updateDynamicContent(lang) {
-            // Update chart titles if they exist (they are re-rendered by loadDashboard but we can update static headers)
-            // This function is a placeholder for any manual updates needed beyond data-i18n
-        }
-
-        langToggleBtn.addEventListener('click', () => {
-            const newLang = currentLang === 'en' ? 'si' : 'en';
-            updateLanguage(newLang);
-        });
-
-        // Initialize Language
-        updateLanguage(currentLang);
 
         // Supabase Configuration
         const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
