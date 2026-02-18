@@ -3,7 +3,8 @@
 
 <head>
     <script>
-        if (localStorage.getItem('isAuthenticated') !== 'true') {
+        const sbToken = localStorage.getItem('sb-blwchrthdgdogpgapieg-auth-token');
+        if (!sbToken) {
             window.location.href = 'login.html';
         }
     </script>
@@ -1533,9 +1534,22 @@
 
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
+                logoutBtn.addEventListener('click', async (e) => {
                     e.preventDefault();
-                    localStorage.removeItem('isAuthenticated');
+                    // We need to import supabase here or use global if available. 
+                    // Since this is inside type="module" script, we can import it.
+                    // But wait, the supabase client is not exposed globally in this file yet.
+                    // Let's check if we can import it dynamically or if it's already imported.
+                    // It is imported as 'createClient' at top of module.
+                    // We need to initialize it if not already available in this scope.
+
+                    // Re-initializing for logout
+                    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+                    const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
+                    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
+                    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                    await sb.auth.signOut();
                     window.location.href = 'login.html';
                 });
             }

@@ -3,7 +3,8 @@
 
 <head>
     <script>
-        if (localStorage.getItem('isAuthenticated') !== 'true') {
+        const sbToken = localStorage.getItem('sb-blwchrthdgdogpgapieg-auth-token');
+        if (!sbToken) {
             window.location.href = 'login.html';
         }
     </script>
@@ -576,8 +577,8 @@
             }
         });
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('isAuthenticated');
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
             window.location.href = 'login.html';
         });
 

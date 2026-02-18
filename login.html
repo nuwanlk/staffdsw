@@ -8,6 +8,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #1a1a2e;
@@ -183,8 +184,8 @@
         <h1>STAFF ADMIN</h1>
         <form id="loginForm">
             <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" required autocomplete="username">
+                <label for="username">Email</label>
+                <input type="email" id="username" required autocomplete="email">
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
@@ -199,24 +200,44 @@
         const loginForm = document.getElementById('loginForm');
         const errorMsg = document.getElementById('errorMsg');
 
-        // Check if already logged in
-        if (localStorage.getItem('isAuthenticated') === 'true') {
+        // Initialize Supabase Client
+        const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Check if already logged in (Supabase session check)
+        // We use localStorage key check for speed, then verify with getUser
+        const sbToken = localStorage.getItem('sb-blwchrthdgdogpgapieg-auth-token');
+        if (sbToken) {
             window.location.href = 'index.html';
         }
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const btn = document.querySelector('.btn-login');
 
-            // Simple client-side check (NOT SECURE - Prototype only)
-            if (username === 'admin' && password === 'admin123') {
-                localStorage.setItem('isAuthenticated', 'true');
-                // Optional: Store login timestamp for session expiration logic
-                localStorage.setItem('loginTime', Date.now());
+            errorMsg.classList.remove('visible');
+            btn.disabled = true;
+            btn.textContent = 'Authenticating...';
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                // Success
                 window.location.href = 'index.html';
-            } else {
+
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = error.message || 'Invalid login credentials';
                 errorMsg.classList.add('visible');
+
                 // Shake animation effect
                 document.querySelector('.login-container').animate([
                     { transform: 'translateX(0)' },
@@ -229,6 +250,9 @@
                     duration: 400,
                     easing: 'ease-in-out'
                 });
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Access Dashboard';
             }
         });
     </script>
