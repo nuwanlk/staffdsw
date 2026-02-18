@@ -2,6 +2,11 @@
 <html lang="en">
 
 <head>
+    <script>
+        if (localStorage.getItem('isAuthenticated') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Staff Member - Staff Management System</title>
@@ -584,6 +589,7 @@
             <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
                 <span class="icon">☀️</span>
             </button>
+            <button id="logout-btn" class="nav-btn">Logout</button>
         </nav>
 
         <div id="message-container"></div>
@@ -1524,6 +1530,15 @@
                     themeIcon.textContent = '🌙';
                 }
             });
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('isAuthenticated');
+                    window.location.href = 'login.html';
+                });
+            }
         });
     </script>
 </body>

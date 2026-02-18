@@ -2,6 +2,11 @@
 <html lang="en">
 
 <head>
+    <script>
+        if (localStorage.getItem('isAuthenticated') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Staff - Staff Management System</title>
@@ -613,6 +618,7 @@
             <button id="theme-toggle" class="nav-btn" aria-label="Toggle Theme">
                 <span class="icon">☀️</span>
             </button>
+            <button id="logout-btn" class="nav-btn">Logout</button>
         </nav>
 
         <div class="search-container">
@@ -705,6 +711,11 @@
                 localStorage.setItem('theme', 'light');
                 themeIcon.textContent = '🌙';
             }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('isAuthenticated');
+            window.location.href = 'login.html';
         });
 
         let currentResults = [];
