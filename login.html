@@ -8,7 +8,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
             --primary: #1a1a2e;
@@ -198,63 +198,46 @@
         </form>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const loginForm = document.getElementById('loginForm');
         const errorMsg = document.getElementById('errorMsg');
 
-        // Initialize Supabase Client
-        const SUPABASE_URL = 'https://blwchrthdgdogpgapieg.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsd2NocnRoZGdkb2dwZ2FwaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTE5MjEsImV4cCI6MjA4NjU2NzkyMX0.xXk-uVyKxT0AsRHnnTcHs3bSJL2r5b17N4zdwZR1qcU';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Check if already logged in (Supabase session check)
-        // We use localStorage key check for speed, then verify with getUser
-        const sbToken = localStorage.getItem('sb-blwchrthdgdogpgapieg-auth-token');
-        if (sbToken) {
+        // Check if already logged in using Supabase's own session API
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
             window.location.href = 'index.html';
         }
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            console.log('Login form submitted');
 
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.querySelector('.btn-login');
 
-            console.log('Attempting login for:', email);
-
             errorMsg.classList.remove('visible');
+            errorMsg.textContent = '';
             btn.disabled = true;
             btn.textContent = 'Authenticating...';
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-                if (error) {
-                    console.error('Supabase signInWithPassword error:', error);
-                    throw error;
-                }
+                if (error) throw error;
 
-                console.log('Login successful:', data);
-
-                // Store session manually to be safe
-                if (data.session) {
-                    localStorage.setItem('sb-blwchrthdgdogpgapieg-auth-token', JSON.stringify(data.session));
-                }
-
-                // Success
+                // Success - redirect to dashboard
                 window.location.href = 'index.html';
 
-            } catch (error) {
-                console.error('Login catch block:', error);
-                errorMsg.textContent = error.message || 'Invalid login credentials';
+            } catch (err) {
+                errorMsg.textContent = err.message || 'Login failed. Please try again.';
                 errorMsg.classList.add('visible');
 
-                // Shake animation effect
                 document.querySelector('.login-container').animate([
                     { transform: 'translateX(0)' },
                     { transform: 'translateX(-10px)' },
@@ -262,10 +245,8 @@
                     { transform: 'translateX(-10px)' },
                     { transform: 'translateX(10px)' },
                     { transform: 'translateX(0)' }
-                ], {
-                    duration: 400,
-                    easing: 'ease-in-out'
-                });
+                ], { duration: 400, easing: 'ease-in-out' });
+
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Access Dashboard';
