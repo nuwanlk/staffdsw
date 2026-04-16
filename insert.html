@@ -891,6 +891,14 @@
                             <option value="Female">දුව</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>දරුවා ආබාධිතද?</label>
+                        <select name="child_is_disabled_${childCount}" class="child-is-disabled">
+                            <option value=""></option>
+                            <option value="Yes">ඔව්</option>
+                            <option value="No">නැත</option>
+                        </select>
+                    </div>
                 </div>
             `;
             childrenList.appendChild(childEntry);
@@ -1143,12 +1151,14 @@
                 const name = entry.querySelector('.child-name').value;
                 const dob = entry.querySelector('.child-dob').value;
                 const gender = entry.querySelector('.child-gender').value;
+                const isDisabled = entry.querySelector('.child-is-disabled') ? entry.querySelector('.child-is-disabled').value : '';
 
-                if (name || dob || gender) {
+                if (name || dob || gender || isDisabled) {
                     children.push({
                         name: name,
                         date_of_birth: dob,
-                        gender: gender
+                        gender: gender,
+                        is_disabled: isDisabled
                     });
                 }
             });
@@ -1418,6 +1428,7 @@
                         const nameEl = entry.querySelector('.child-name');
                         const dobEl = entry.querySelector('.child-dob');
                         const genderEl = entry.querySelector('.child-gender');
+                        const isDisabledEl = entry.querySelector('.child-is-disabled');
                         if (nameEl) nameEl.value = child.name || '';
                         if (dobEl) {
                             if (child.date_of_birth) {
@@ -1427,6 +1438,7 @@
                             }
                         }
                         if (genderEl) genderEl.value = child.gender || '';
+                        if (isDisabledEl) isDisabledEl.value = child.is_disabled || '';
                     });
                 }
 

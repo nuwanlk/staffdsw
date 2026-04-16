@@ -915,6 +915,7 @@
                                         <strong>${child.name || 'N/A'}</strong> - 
                                         ${child.gender || 'N/A'} - 
                                         DOB: ${child.date_of_birth || 'N/A'}
+                                        ${child.is_disabled ? `<br>ආබාධිතද: ${child.is_disabled === 'Yes' ? 'ඔව්' : 'නැත'}` : ''}
                                     </div>
                                 `).join('')}
                             </div>
