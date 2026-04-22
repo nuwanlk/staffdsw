@@ -739,6 +739,14 @@
                         <label for="efficiency_bar_exam_grade1_date">1 ශ්‍රේණිය විභාග සමත් දිනය</label>
                         <input type="date" id="efficiency_bar_exam_grade1_date" name="efficiency_bar_exam_grade1_date">
                     </div>
+                    <div class="form-group">
+                        <label for="second_language_proficiency">දෙවන භාෂා ප්‍රවීනතාවය</label>
+                        <select id="second_language_proficiency" name="second_language_proficiency">
+                            <option value="">-- තෝරන්න --</option>
+                            <option value="ලබා ඇත">ලබා ඇත</option>
+                            <option value="ලබා නැත">ලබා නැත</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Promotions -->
@@ -1309,6 +1317,7 @@
                         const type = el.querySelector('.leave-type')?.value || '';
                         const start = el.querySelector('.leave-start')?.value || '';
                         const end = el.querySelector('.leave-end')?.value || '';
+                    data.second_language_proficiency = form.querySelector('#second_language_proficiency')?.value || null;
                         if (type || start || end) items.push({ type, start_date: start || null, end_date: end || null });
                     }
                     return items.length ? items : null;
