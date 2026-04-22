@@ -1028,7 +1028,7 @@
                 keyEl.textContent = '';
                 return;
             }
-            const pension = new Date(d.getFullYear() + 55, d.getMonth(), d.getDate());
+            const pension = new Date(d.getFullYear() + 60, d.getMonth(), d.getDate());
             const display = pension.toLocaleDateString();
             keyEl.textContent = `Pension date (auto): ${display}`;
             // If pension_date not set, set placeholder to computed value
