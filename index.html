@@ -665,7 +665,7 @@
                         const dobVal = s.date_of_birth || s.dob || s.birthday || s.birth_date || s['date-of-birth'];
                         if (dobVal) {
                             const d = new Date(dobVal);
-                            if (!isNaN(d)) pensionDate = new Date(d.getFullYear() + 55, d.getMonth(), d.getDate());
+                            if (!isNaN(d)) pensionDate = new Date(d.getFullYear() + 60, d.getMonth(), d.getDate());
                         }
                     }
                     return { record: s, pensionDate };
