@@ -522,10 +522,13 @@
                 </div>
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card clickable" id="temporary-card">
                 <div class="stat-label">තනතුර ස්ථිර නොවූ නිලධාරීන්</div>
                 <div class="stat-value" id="temporary-count">---</div>
                 <div class="stat-description">ස්ථිර නොවි තනතුරේ සිටින කාර්ය මණ්ඩලය</div>
+                <div id="temporary-popup"
+                    style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;">
+                </div>
             </div>
         </div>
 
@@ -716,11 +719,13 @@
                 renderRetiringSoon(retiringList.slice(0, 20));
 
                 // --- Count temporary appointments (is_appointment_permanent is false) ---
-                const temporaryCount = staff.filter(s => s.is_appointment_permanent === false).length;
+                const temporaryList = staff.filter(s => s.is_appointment_permanent === false);
+                const temporaryCount = temporaryList.length;
                 console.debug('Temporary appointment count computed:', temporaryCount);
                 const tempEl = document.getElementById('temporary-count');
                 if (tempEl) tempEl.textContent = String(temporaryCount);
                 animateValue('temporary-count', 0, temporaryCount, 1000);
+                window.temporaryListGlobal = temporaryList;
 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -878,9 +883,23 @@
                 return;
             }
 
+            // Temporary appointments card handler
+            const tempCard = document.getElementById('temporary-card');
+            const tempPopup = document.getElementById('temporary-popup');
+            if (tempCard && tempCard.contains(e.target)) {
+                const list = window.temporaryListGlobal || [];
+                if (list.length === 0) tempPopup.innerHTML = '<div class="popup-item">No staff with temporary appointments</div>';
+                else tempPopup.innerHTML = list.slice(0, 20).map(s => {
+                    return `<div class="popup-item"><strong>${s.name_with_initials || 'Unknown'}</strong> — ${s.designation || 'Staff'}</div>`;
+                }).join('');
+                tempPopup.style.display = tempPopup.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+
             // hide any open popups when clicking outside
             if (retirePopup && retirePopup.style.display === 'block' && !retireCard.contains(e.target)) retirePopup.style.display = 'none';
             if (incPopup && incPopup.style.display === 'block' && !incCard.contains(e.target)) incPopup.style.display = 'none';
+            if (tempPopup && tempPopup.style.display === 'block' && !tempCard.contains(e.target)) tempPopup.style.display = 'none';
         });
     </script>
 </body>
