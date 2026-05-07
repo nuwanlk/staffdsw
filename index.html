@@ -736,8 +736,7 @@
         function renderChart(containerId, data, total) {
             const container = document.getElementById(containerId);
             const sortedData = Object.entries(data)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 8);
+                .sort((a, b) => b[1] - a[1]);
 
             container.innerHTML = sortedData.map(([label, count]) => {
                 const percentage = (count / total * 100).toFixed(1);
