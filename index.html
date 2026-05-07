@@ -521,6 +521,12 @@
                     style="display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;max-height:220px;overflow:auto;">
                 </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-label">තනතුර ස්ථිර නොවූ නිලධාරීන්</div>
+                <div class="stat-value" id="temporary-count">---</div>
+                <div class="stat-description">ස්ථිර නොවි තනතුරේ සිටින කාර්ය මණ්ඩලය</div>
+            </div>
         </div>
 
         <div class="chart-section">
@@ -708,6 +714,13 @@
                 window.incrementListGlobal = incrementList;
                 renderIncrementSoon(incrementList.slice(0, 20));
                 renderRetiringSoon(retiringList.slice(0, 20));
+
+                // --- Count temporary appointments (is_appointment_permanent is false) ---
+                const temporaryCount = staff.filter(s => s.is_appointment_permanent === false).length;
+                console.debug('Temporary appointment count computed:', temporaryCount);
+                const tempEl = document.getElementById('temporary-count');
+                if (tempEl) tempEl.textContent = String(temporaryCount);
+                animateValue('temporary-count', 0, temporaryCount, 1000);
 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
