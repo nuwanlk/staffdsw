@@ -1224,29 +1224,121 @@
                 return;
             }
 
-            const headers = [
-                'Name with Initials', 'Full Name (English)', 'Full Name (Sinhala)',
-                'Designation', 'Grade', 'Gender', 'NIC Number', 'Phone', 'Email',
-                'Marital Status', 'First Appointment Date', 'Is Permanent'
+            function safeParseJSON(val) {
+                if (typeof val === 'string' && val.trim()) {
+                    try {
+                        return JSON.parse(val);
+                    } catch (e) {
+                        return val;
+                    }
+                }
+                return val;
+            }
+
+            function formatQualifications(quals) {
+                const parsed = safeParseJSON(quals);
+                if (!parsed) return '';
+                if (Array.isArray(parsed)) {
+                    return parsed.map(q => {
+                        const desc = q.description || '';
+                        const inst = q.institution ? ` at ${q.institution}` : '';
+                        const year = q.year ? ` (${q.year})` : '';
+                        return `${desc}${inst}${year}`;
+                    }).join('; ');
+                }
+                return String(parsed);
+            }
+
+            function formatChildren(children) {
+                const parsed = safeParseJSON(children);
+                if (!parsed || !Array.isArray(parsed)) return '';
+                return parsed.map(c => {
+                    const name = c.name || 'N/A';
+                    const gender = c.gender || 'N/A';
+                    const dob = c.date_of_birth || 'N/A';
+                    const disabled = c.is_disabled ? ` (Disabled: ${c.is_disabled})` : '';
+                    return `${name} (${gender}, DOB: ${dob}${disabled})`;
+                }).join('; ');
+            }
+
+            function formatLeave(leaves) {
+                const parsed = safeParseJSON(leaves);
+                if (!parsed || !Array.isArray(parsed)) return '';
+                return parsed.map(l => {
+                    const type = l.type || l.leave_type || 'N/A';
+                    const start = l.start_date || 'N/A';
+                    const end = l.end_date || 'N/A';
+                    return `${type} (${start} to ${end})`;
+                }).join('; ');
+            }
+
+            function formatDisabilities(dis) {
+                const parsed = safeParseJSON(dis);
+                if (!parsed) return '';
+                if (Array.isArray(parsed)) {
+                    return parsed.map(d => d.description || d || '').filter(Boolean).join('; ');
+                }
+                return String(parsed);
+            }
+
+            function escapeCSV(val) {
+                if (val === undefined || val === null) return '""';
+                let str = String(val);
+                str = str.replace(/"/g, '""');
+                return `"${str}"`;
+            }
+
+            const columns = [
+                { header: 'ID', select: s => s.id || '' },
+                { header: 'Name with Initials', select: s => s.name_with_initials || '' },
+                { header: 'Full Name (English)', select: s => s.name_full_english || '' },
+                { header: 'Full Name (Sinhala)', select: s => s.name_full_sinhala || '' },
+                { header: 'Date of Birth', select: s => s.date_of_birth || '' },
+                { header: 'NIC Number', select: s => s.nic_number || '' },
+                { header: 'Gender', select: s => s.gender || '' },
+                { header: 'Marital Status', select: s => s.marital_status || '' },
+                { header: 'Permanent Address', select: s => s.permanent_address || '' },
+                { header: 'Phone Number', select: s => s.phone_no || '' },
+                { header: 'WhatsApp Number', select: s => s.whatsapp_no || '' },
+                { header: 'Email Address', select: s => s.email_address || '' },
+                { header: 'Designation', select: s => s.designation || '' },
+                { header: 'Grade', select: s => s.grade || '' },
+                { header: 'First Appointment Date', select: s => s.first_appointment_date || '' },
+                { header: 'Appointment Letter Number', select: s => s.appointment_letter_no || '' },
+                { header: 'Previous Appointment Designation', select: s => s.previous_appointment_designation || '' },
+                { header: 'Previous Appointment Date', select: s => s.previous_appointment_date || '' },
+                { header: 'Transferred to Current Institute Date', select: s => s.transferred_to_current_institute_date || '' },
+                { header: 'Is Appointment Permanent', select: s => s.is_appointment_permanent ? 'Yes' : 'No' },
+                { header: 'Permanent Date', select: s => s.permanent_date || '' },
+                { header: 'Education & Qualifications', select: s => formatQualifications(s.education_qualifications) },
+                { header: 'Efficiency Bar Exam Grade 3 Date', select: s => s.efficiency_bar_exam_grade3_date || '' },
+                { header: 'Efficiency Bar Exam Grade 2 Date', select: s => s.efficiency_bar_exam_grade2_date || '' },
+                { header: 'Efficiency Bar Exam Grade 1 Date', select: s => s.efficiency_bar_exam_grade1_date || '' },
+                { header: 'Second Language Proficiency', select: s => s.second_language_proficiency || '' },
+                { header: 'Promoted to Grade 2 Date', select: s => s.promoted_to_grade2_date || '' },
+                { header: 'Promoted to Grade 1 Date', select: s => s.promoted_to_grade1_date || '' },
+                { header: 'Promoted to Special Grade Date', select: s => s.promoted_to_special_grade_date || '' },
+                { header: 'Promoted to Supra Date', select: s => s.promoted_to_supra_date || '' },
+                { header: 'Spouse Name', select: s => s.spouse_name || '' },
+                { header: 'Spouse Designation', select: s => s.spouse_designation || '' },
+                { header: 'Spouse Workplace', select: s => s.spouse_workplace || '' },
+                { header: 'Children Information', select: s => formatChildren(s.children) },
+                { header: 'Has Disability', select: s => s.has_disability || '' },
+                { header: 'Disabilities', select: s => formatDisabilities(s.disabilities) },
+                { header: 'Pension Date', select: s => s.pension_date || '' },
+                { header: 'Resignation Date', select: s => s.resignation_date || '' },
+                { header: 'Moved to Another Service Date', select: s => s.moved_to_another_service_date || '' },
+                { header: 'Dismissal Date', select: s => s.dismissal_date || '' },
+                { header: 'Leave Information', select: s => formatLeave(s.leave_information) },
+                { header: 'Created At', select: s => s.created_at || '' }
             ];
 
-            const csvContent = [
-                headers.join(','),
-                ...currentResults.map(staff => [
-                    `"${staff.name_with_initials || ''}"`,
-                    `"${staff.name_full_english || ''}"`,
-                    `"${staff.name_full_sinhala || ''}"`,
-                    `"${staff.designation || ''}"`,
-                    `"${staff.grade || ''}"`,
-                    `"${staff.gender || ''}"`,
-                    `"${staff.nic_number || ''}"`,
-                    `"${staff.phone_no || ''}"`,
-                    `"${staff.email_address || ''}"`,
-                    `"${staff.marital_status || ''}"`,
-                    `"${staff.first_appointment_date || ''}"`,
-                    `"${staff.is_appointment_permanent ? 'Yes' : 'No'}"`
-                ].join(','))
-            ].join('\n');
+            const headers = columns.map(c => c.header);
+            const csvRows = [
+                headers.map(h => escapeCSV(h)).join(','),
+                ...currentResults.map(staff => columns.map(col => col.select(staff)).map(val => escapeCSV(val)).join(','))
+            ];
+            const csvContent = csvRows.join('\n');
 
             // Add UTF-8 BOM for Sinhala/Unicode support
             const BOM = '\uFEFF';
