@@ -682,7 +682,9 @@
                 </div>
                 <div class="search-group">
                     <label for="search-designation">Designation</label>
-                    <input type="text" id="search-designation" placeholder="Search by designation...">
+                    <select id="search-designation">
+                        <option value="">All</option>
+                    </select>
                 </div>
                 <div class="search-group">
                     <label for="search-grade">Grade</label>
@@ -775,6 +777,32 @@
         });
 
         let currentResults = [];
+
+        async function loadDesignations() {
+            try {
+                const { data, error } = await supabase
+                    .from('staff_members')
+                    .select('designation')
+                    .not('designation', 'is', null)
+                    .limit(2000);
+                if (error) throw error;
+                const unique = Array.from(new Set((data || []).map(d => (d.designation || '').trim()).filter(Boolean)));
+                const sortedDesignations = unique.sort((a, b) => a.localeCompare(b));
+                
+                const selectEl = document.getElementById('search-designation');
+                if (selectEl) {
+                    selectEl.innerHTML = '<option value="">All</option>';
+                    sortedDesignations.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d;
+                        opt.textContent = d;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.warn('Failed to load designations:', err);
+            }
+        }
 
         async function searchStaff() {
             const resultsDiv = document.getElementById('results');
@@ -1359,6 +1387,7 @@
 
         // Load all staff on page load
         document.addEventListener('DOMContentLoaded', () => {
+            loadDesignations();
             searchStaff();
         });
     </script>
