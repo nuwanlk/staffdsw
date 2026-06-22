@@ -299,6 +299,24 @@
             color: var(--text-dim);
         }
 
+        .export-card-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            transition: color 0.2s, transform 0.2s;
+            z-index: 10;
+        }
+
+        .export-card-btn:hover {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
         .chart-section {
             background: var(--card-bg);
             border: 2px solid var(--border);
@@ -490,21 +508,25 @@
 
         <div class="stats-grid">
             <div class="stat-card">
+                <button class="export-card-btn" onclick="exportCardData(event, 'total-staff')" title="Export to Excel">🖨️</button>
                 <div class="stat-label">මුළු කාර්ය මණ්ඩලය</div>
                 <div class="stat-value" id="total-staff">---</div>
                 <div class="stat-description">Active employees</div>
             </div>
             <div class="stat-card">
+                <button class="export-card-btn" onclick="exportCardData(event, 'male-count')" title="Export to Excel">🖨️</button>
                 <div class="stat-label">පිරිමි</div>
                 <div class="stat-value" id="male-count">---</div>
                 <div class="stat-description">Male employees</div>
             </div>
             <div class="stat-card">
+                <button class="export-card-btn" onclick="exportCardData(event, 'female-count')" title="Export to Excel">🖨️</button>
                 <div class="stat-label">ගැහැණු</div>
                 <div class="stat-value" id="female-count">---</div>
                 <div class="stat-description">Female employees</div>
             </div>
             <div class="stat-card clickable" id="increment-card">
+                <button class="export-card-btn" onclick="exportCardData(event, 'increment-count')" title="Export to Excel">🖨️</button>
                 <div class="stat-label">වැටුප් වර්ධක දින ආසන්න</div>
                 <div class="stat-value" id="increment-count">---</div>
                 <div class="stat-description">ඉදිරි දින 30 තුළ වැටුප් වර්ධක දින ඇති</div>
@@ -514,6 +536,7 @@
             </div>
 
             <div class="stat-card clickable" id="retire-card">
+                <button class="export-card-btn" onclick="exportCardData(event, 'retire-count')" title="Export to Excel">🖨️</button>
                 <div class="stat-label">Retiring (5y)</div>
                 <div class="stat-value" id="retire-count">---</div>
                 <div class="stat-description">ඉදිරි වසර 5 තුළ විශ්‍රාම ගන්නා</div>
@@ -523,6 +546,7 @@
             </div>
 
             <div class="stat-card clickable" id="temporary-card">
+                <button class="export-card-btn" onclick="exportCardData(event, 'temporary-count')" title="Export to Excel">🖨️</button>
                 <div class="stat-label">තනතුර ස්ථිර නොවූ නිලධාරීන්</div>
                 <div class="stat-value" id="temporary-count">---</div>
                 <div class="stat-description">ස්ථිර නොවි තනතුරේ සිටින කාර්ය මණ්ඩලය</div>
@@ -623,6 +647,10 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
+
+                window.allStaffGlobal = staff;
+                window.maleStaffGlobal = staff.filter(s => s.gender?.toLowerCase() === 'male');
+                window.femaleStaffGlobal = staff.filter(s => s.gender?.toLowerCase() === 'female');
 
                 // Calculate statistics
                 const totalStaff = staff.length;
@@ -845,6 +873,174 @@
                 `;
             }).join('');
         }
+
+        function exportCardData(event, cardType) {
+            event.stopPropagation();
+
+            let dataToExport = [];
+            let filename = '';
+
+            switch (cardType) {
+                case 'total-staff':
+                    dataToExport = window.allStaffGlobal || [];
+                    filename = 'all_staff';
+                    break;
+                case 'male-count':
+                    dataToExport = window.maleStaffGlobal || [];
+                    filename = 'male_staff';
+                    break;
+                case 'female-count':
+                    dataToExport = window.femaleStaffGlobal || [];
+                    filename = 'female_staff';
+                    break;
+                case 'increment-count':
+                    dataToExport = (window.incrementListGlobal || []).map(x => x.record);
+                    filename = 'upcoming_increments';
+                    break;
+                case 'retire-count':
+                    dataToExport = (window.retiringListGlobal || []).map(x => x.record);
+                    filename = 'retiring_staff_5y';
+                    break;
+                case 'temporary-count':
+                    dataToExport = window.temporaryListGlobal || [];
+                    filename = 'temporary_staff';
+                    break;
+                default:
+                    return;
+            }
+
+            if (dataToExport.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+
+            function safeParseJSON(val) {
+                if (typeof val === 'string' && val.trim()) {
+                    try {
+                        return JSON.parse(val);
+                    } catch (e) {
+                        return val;
+                    }
+                }
+                return val;
+            }
+
+            function formatQualifications(quals) {
+                const parsed = safeParseJSON(quals);
+                if (!parsed) return '';
+                if (Array.isArray(parsed)) {
+                    return parsed.map(q => {
+                        const desc = q.description || '';
+                        const inst = q.institution ? ` at ${q.institution}` : '';
+                        const year = q.year ? ` (${q.year})` : '';
+                        return `${desc}${inst}${year}`;
+                    }).join('; ');
+                }
+                return String(parsed);
+            }
+
+            function formatChildren(children) {
+                const parsed = safeParseJSON(children);
+                if (!parsed || !Array.isArray(parsed)) return '';
+                return parsed.map(c => {
+                    const name = c.name || 'N/A';
+                    const gender = c.gender || 'N/A';
+                    const dob = c.date_of_birth || 'N/A';
+                    const disabled = c.is_disabled ? ` (Disabled: ${c.is_disabled})` : '';
+                    return `${name} (${gender}, DOB: ${dob}${disabled})`;
+                }).join('; ');
+            }
+
+            function formatLeave(leaves) {
+                const parsed = safeParseJSON(leaves);
+                if (!parsed || !Array.isArray(parsed)) return '';
+                return parsed.map(l => {
+                    const type = l.type || l.leave_type || 'N/A';
+                    const start = l.start_date || 'N/A';
+                    const end = l.end_date || 'N/A';
+                    return `${type} (${start} to ${end})`;
+                }).join('; ');
+            }
+
+            function formatDisabilities(dis) {
+                const parsed = safeParseJSON(dis);
+                if (!parsed) return '';
+                if (Array.isArray(parsed)) {
+                    return parsed.map(d => d.description || d || '').filter(Boolean).join('; ');
+                }
+                return String(parsed);
+            }
+
+            function escapeCSV(val) {
+                if (val === undefined || val === null) return '""';
+                let str = String(val);
+                str = str.replace(/"/g, '""');
+                return `"${str}"`;
+            }
+
+            const columns = [
+                { header: 'ID', select: s => s.id || '' },
+                { header: 'Name with Initials', select: s => s.name_with_initials || '' },
+                { header: 'Full Name (English)', select: s => s.name_full_english || '' },
+                { header: 'Full Name (Sinhala)', select: s => s.name_full_sinhala || '' },
+                { header: 'Date of Birth', select: s => s.date_of_birth || '' },
+                { header: 'NIC Number', select: s => s.nic_number || '' },
+                { header: 'Gender', select: s => s.gender || '' },
+                { header: 'Marital Status', select: s => s.marital_status || '' },
+                { header: 'Permanent Address', select: s => s.permanent_address || '' },
+                { header: 'Phone Number', select: s => s.phone_no || '' },
+                { header: 'WhatsApp Number', select: s => s.whatsapp_no || '' },
+                { header: 'Email Address', select: s => s.email_address || '' },
+                { header: 'Designation', select: s => s.designation || '' },
+                { header: 'Grade', select: s => s.grade || '' },
+                { header: 'First Appointment Date', select: s => s.first_appointment_date || '' },
+                { header: 'Appointment Letter Number', select: s => s.appointment_letter_no || '' },
+                { header: 'Previous Appointment Designation', select: s => s.previous_appointment_designation || '' },
+                { header: 'Previous Appointment Date', select: s => s.previous_appointment_date || '' },
+                { header: 'Transferred to Current Institute Date', select: s => s.transferred_to_current_institute_date || '' },
+                { header: 'Is Appointment Permanent', select: s => s.is_appointment_permanent ? 'Yes' : 'No' },
+                { header: 'Permanent Date', select: s => s.permanent_date || '' },
+                { header: 'Education & Qualifications', select: s => formatQualifications(s.education_qualifications) },
+                { header: 'Efficiency Bar Exam Grade 3 Date', select: s => s.efficiency_bar_exam_grade3_date || '' },
+                { header: 'Efficiency Bar Exam Grade 2 Date', select: s => s.efficiency_bar_exam_grade2_date || '' },
+                { header: 'Efficiency Bar Exam Grade 1 Date', select: s => s.efficiency_bar_exam_grade1_date || '' },
+                { header: 'Second Language Proficiency', select: s => s.second_language_proficiency || '' },
+                { header: 'Promoted to Grade 2 Date', select: s => s.promoted_to_grade2_date || '' },
+                { header: 'Promoted to Grade 1 Date', select: s => s.promoted_to_grade1_date || '' },
+                { header: 'Promoted to Special Grade Date', select: s => s.promoted_to_special_grade_date || '' },
+                { header: 'Promoted to Supra Date', select: s => s.promoted_to_supra_date || '' },
+                { header: 'Spouse Name', select: s => s.spouse_name || '' },
+                { header: 'Spouse Designation', select: s => s.spouse_designation || '' },
+                { header: 'Spouse Workplace', select: s => s.spouse_workplace || '' },
+                { header: 'Children Information', select: s => formatChildren(s.children) },
+                { header: 'Has Disability', select: s => s.has_disability || '' },
+                { header: 'Disabilities', select: s => formatDisabilities(s.disabilities) },
+                { header: 'Pension Date', select: s => s.pension_date || '' },
+                { header: 'Resignation Date', select: s => s.resignation_date || '' },
+                { header: 'Moved to Another Service Date', select: s => s.moved_to_another_service_date || '' },
+                { header: 'Dismissal Date', select: s => s.dismissal_date || '' },
+                { header: 'Leave Information', select: s => formatLeave(s.leave_information) },
+                { header: 'Created At', select: s => s.created_at || '' }
+            ];
+
+            const headers = columns.map(c => c.header);
+            const csvRows = [
+                headers.map(h => escapeCSV(h)).join(','),
+                ...dataToExport.map(staff => columns.map(col => col.select(staff)).map(val => escapeCSV(val)).join(','))
+            ];
+            const csvContent = csvRows.join('\n');
+
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        window.exportCardData = exportCardData;
 
         // Load dashboard on page load
         document.addEventListener('DOMContentLoaded', loadDashboard);
