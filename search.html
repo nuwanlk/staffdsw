@@ -688,7 +688,9 @@
                 </div>
                 <div class="search-group">
                     <label for="search-grade">Grade</label>
-                    <input type="text" id="search-grade" placeholder="Search by grade...">
+                    <select id="search-grade">
+                        <option value="">All</option>
+                    </select>
                 </div>
                 <div class="search-group">
                     <label for="search-dob">Date of Birth</label>
@@ -778,29 +780,45 @@
 
         let currentResults = [];
 
-        async function loadDesignations() {
+        async function loadSearchFilters() {
             try {
                 const { data, error } = await supabase
                     .from('staff_members')
-                    .select('designation')
-                    .not('designation', 'is', null)
+                    .select('designation, grade')
                     .limit(2000);
                 if (error) throw error;
-                const unique = Array.from(new Set((data || []).map(d => (d.designation || '').trim()).filter(Boolean)));
-                const sortedDesignations = unique.sort((a, b) => a.localeCompare(b));
                 
-                const selectEl = document.getElementById('search-designation');
-                if (selectEl) {
-                    selectEl.innerHTML = '<option value="">All</option>';
+                // Populate designations
+                const uniqueDesignations = Array.from(new Set((data || []).map(d => (d.designation || '').trim()).filter(Boolean)));
+                const sortedDesignations = uniqueDesignations.sort((a, b) => a.localeCompare(b));
+                
+                const designationSelect = document.getElementById('search-designation');
+                if (designationSelect) {
+                    designationSelect.innerHTML = '<option value="">All</option>';
                     sortedDesignations.forEach(d => {
                         const opt = document.createElement('option');
                         opt.value = d;
                         opt.textContent = d;
-                        selectEl.appendChild(opt);
+                        designationSelect.appendChild(opt);
+                    });
+                }
+
+                // Populate grades
+                const uniqueGrades = Array.from(new Set((data || []).map(d => (d.grade || '').trim()).filter(Boolean)));
+                const sortedGrades = uniqueGrades.sort((a, b) => a.localeCompare(b));
+                
+                const gradeSelect = document.getElementById('search-grade');
+                if (gradeSelect) {
+                    gradeSelect.innerHTML = '<option value="">All</option>';
+                    sortedGrades.forEach(g => {
+                        const opt = document.createElement('option');
+                        opt.value = g;
+                        opt.textContent = g;
+                        gradeSelect.appendChild(opt);
                     });
                 }
             } catch (err) {
-                console.warn('Failed to load designations:', err);
+                console.warn('Failed to load search filters:', err);
             }
         }
 
@@ -1387,7 +1405,7 @@
 
         // Load all staff on page load
         document.addEventListener('DOMContentLoaded', () => {
-            loadDesignations();
+            loadSearchFilters();
             searchStaff();
         });
     </script>
