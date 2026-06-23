@@ -845,7 +845,7 @@
                     query = query.ilike('designation', `%${designation}%`);
                 }
                 if (grade) {
-                    query = query.ilike('grade', `%${grade}%`);
+                    query = query.eq('grade', grade);
                 }
                 if (gender) {
                     query = query.eq('gender', gender);
